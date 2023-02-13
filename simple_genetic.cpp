@@ -5,24 +5,17 @@
 #include <numeric>
 #include <algorithm>
 
-template <typename T>
-std::vector<int> argsort(const std::vector<T> &v) {
-    //Argsort for any type of elem-comparable vectors
-    std::vector<int> idx(v.size());
-    std::iota(idx.begin(), idx.end(), 0);
-
-    std::stable_sort(idx.begin(), idx.end(),
-        [&v](int i1, int i2) {return v[i1] < v[i2];});
-
-    return idx;
-}
+/*
+TODO
+Chromosome is a vector => very bad (try class template?)
+*/
 
 class GeneticAlgorithm;
 
 class Individual {
-public:
     std::vector<bool> chromosome;
 
+public:
     Individual(int chromosome_size)
     {
         double p = 0.5;
@@ -44,20 +37,20 @@ public:
     };
 
 
-    template<std::size_t SIZE1, std::size_t SIZE2>
-    bool is_coverage(std::array<std::array<bool, SIZE1>, SIZE2>& M)
+    template<std::size_t n, std::size_t m>
+    bool is_coverage(std::array<std::array<bool, n>, m>& M)
     {
         //Sum of all taken columns (by rows, we sum rows) shouldn't include zeros
-        std::array<int, SIZE2> rows_sum = {};
-        for(int i = 0; i < SIZE2; i++) {
-            for(int j = 0; j < SIZE1; j++) {
+        std::array<int, m> rows_sum = {};
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n; j++) {
                 if(!chromosome[j])
                     continue;
                 rows_sum[i] += M[i][j];
             }
         }
 
-        for(int i = 0; i < SIZE2; i++) {
+        for(int i = 0; i < m; i++) {
             //std::cout << rows_sum[i] << std::endl;
             if(!rows_sum[i])
                 return false;
@@ -66,11 +59,11 @@ public:
         return true;
     };
 
-    template<std::size_t SIZE1, std::size_t SIZE2>
-    double fitness(std::array<std::array<bool, SIZE1>, SIZE2>& M)
+    template<std::size_t n, std::size_t m>
+    double fitness(std::array<std::array<bool, n>, m>& M)
     {
         if(!is_coverage(M))
-            return SIZE1 + 1;
+            return n + 1;
 
         int sum = 0;
         for(auto elem: chromosome) {
@@ -80,10 +73,18 @@ public:
     };
 
     friend GeneticAlgorithm;
+    friend std::ostream& operator<<(std::ostream& os, const Individual& I);
+};
+
+std::ostream& operator<<(std::ostream& os, const Individual& I)
+{
+    for(int i = 0; i < I.chromosome.size(); i++) {
+        os << I.chromosome[i] << " ";
+    }
+    return os;
 };
 
 class GeneticAlgorithm {
-public:
     std::vector<Individual> population;
     std::vector<int> scores;
 
@@ -94,6 +95,19 @@ public:
     int extended_population_size;
     double mutation_proba;
 
+    template <typename T>
+    std::vector<int> argsort(const std::vector<T> &v) {
+        //Argsort for any type of elem-comparable vectors
+        std::vector<int> idx(v.size());
+        std::iota(idx.begin(), idx.end(), 0);
+
+        std::stable_sort(idx.begin(), idx.end(),
+            [&v](int i1, int i2) {return v[i1] < v[i2];});
+
+        return idx;
+    }
+
+public:
     GeneticAlgorithm(int population_size, int extended_population_size, int chromosome_len,
                      double mutation_proba, int max_iter = 100)
     {
@@ -141,8 +155,8 @@ public:
         return Individual(new_chromosome);
     };
 
-    template<std::size_t SIZE1, std::size_t SIZE2>
-    void fit(std::array<std::array<bool, SIZE1>, SIZE2>& M) {
+    template<std::size_t n, std::size_t m>
+    void fit(std::array<std::array<bool, n>, m>& M) {
         //CROSSOVER (creating extended population)
         int delta = extended_population_size - population_size;
         int chromosome_len = population[0].chromosome.size();
@@ -176,7 +190,6 @@ public:
             //Get scores
             std::vector<double> scores;
             for(int j = 0; j < extended_population_size; j++) {
-                //WARNING
                 scores.push_back(extended_population[j].fitness(M));
             }
 
@@ -193,7 +206,7 @@ public:
             population = best;
         }
 
-        //std::cout << "Learning finished!" << std::endl;
+        std::cout << "Learning finished!" << std::endl;
     };
 
     std::vector<bool> get_best_chromosome()
@@ -201,10 +214,24 @@ public:
         return population[0].chromosome;
     };
 
-    int f()
+    template<std::size_t n, std::size_t m>
+    void print_solution(std::array<std::array<bool, n>, m>& M)
     {
-        //test values
-        return population[0].chromosome[0];
+        if(n > 25) {
+            std::cout << "WARNING: Coverage output can be too huge." << std::endl;
+        }
+
+        std::cout << "Best chromosome: " << get_best_chromosome() << std::endl;
+        std::cout << "Coverage: " << std::endl;
+        std::vector<bool> best = get_best_chromosome();
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n; j++) {
+                if(!best[j])
+                    continue;
+                std::cout << M[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
     };
 };
 
@@ -216,7 +243,7 @@ int main()
     std::array<std::array<bool, n>, m> M = {};
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100
-    GeneticAlgorithm A = GeneticAlgorithm(15, 75, n, 0.15, 100);
+    GeneticAlgorithm A = GeneticAlgorithm(50, 150, n, 0.2, 100);
 
     double p = 0.5;
     std::random_device rd{};
@@ -232,6 +259,7 @@ int main()
 
 
     A.fit(M);
+    //A.print_solution(M);
 
     return 0;
 }
