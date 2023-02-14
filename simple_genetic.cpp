@@ -156,7 +156,7 @@ public:
     };
 
     template<std::size_t n, std::size_t m>
-    void fit(std::array<std::array<bool, n>, m>& M) {
+    void fit(std::array<std::array<bool, n>, m>& M, int verbose=2, bool finishing_message=true) {
         //CROSSOVER (creating extended population)
         int delta = extended_population_size - population_size;
         int chromosome_len = population[0].chromosome.size();
@@ -196,7 +196,18 @@ public:
             //Take K best
             std::vector<int> argbest = argsort(scores);
 
-            std::cout << scores[argbest[0]] << std::endl;
+            switch(verbose) {
+                case 0:
+                    break;
+                case 1:
+                    std::cout << scores[argbest[0]] << std::endl;
+                    break;
+                case 2:
+                    std::cout << "Generation: " << i << std::endl;
+                    std::cout << "Best individual fitness: " << scores[argbest[0]] << std::endl;
+                    std::cout << std::endl;
+                    break;
+            }
 
             std::vector<Individual> best;
             for(int j = 0; j < population_size; j++) {
@@ -205,8 +216,8 @@ public:
 
             population = best;
         }
-
-        std::cout << "Learning finished!" << std::endl;
+        if(finishing_message)
+            std::cout << "Learning finished!" << std::endl;
     };
 
     std::vector<bool> get_best_chromosome()
@@ -218,7 +229,7 @@ public:
     void print_solution(std::array<std::array<bool, n>, m>& M)
     {
         if(n > 25) {
-            std::cout << "WARNING: Coverage output can be too huge." << std::endl;
+            std::cout << "WARNING: Solution output can be too huge." << std::endl;
         }
 
         std::cout << "Best chromosome: " << get_best_chromosome() << std::endl;
@@ -238,12 +249,12 @@ public:
 int main()
 {
     //Create data
-    const int m = 250;
-    const int n = 250;
+    const int m = 500;
+    const int n = m;
     std::array<std::array<bool, n>, m> M = {};
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100
-    GeneticAlgorithm A = GeneticAlgorithm(50, 150, n, 0.2, 100);
+    GeneticAlgorithm A = GeneticAlgorithm(50, 150, n, 0.15, 100);
 
     double p = 0.5;
     std::random_device rd{};
@@ -258,7 +269,7 @@ int main()
     }
 
 
-    A.fit(M);
+    A.fit(M, 0, false);
     //A.print_solution(M);
 
     return 0;
