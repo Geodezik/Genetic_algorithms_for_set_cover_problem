@@ -249,7 +249,7 @@ public:
 int main()
 {
     //Create data
-    const int m = 500;
+    const int m = 250;
     const int n = m;
     std::array<std::array<bool, n>, m> M = {};
 
@@ -269,7 +269,7 @@ int main()
     }
 
 
-    A.fit(M, 0, false);
+    A.fit(M, 2);
     //A.print_solution(M);
 
     return 0;
