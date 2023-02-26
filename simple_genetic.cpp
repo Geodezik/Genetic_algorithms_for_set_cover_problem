@@ -1,14 +1,42 @@
 #include <iostream>
 #include <vector>
-#include <array>
 #include <random>
 #include <numeric>
 #include <algorithm>
 
-/*
-TODO
-Chromosome is a vector => very bad (try class template?)
-*/
+class BooleanMatrix {
+    int m;
+    int n;
+public:
+    bool** M;
+    BooleanMatrix(int m, int n) {
+        M = new bool*[m];
+        for (int i = 0; i < m; i++)
+            M[i] = new bool[n];
+    }
+
+    int get_m() {
+        return m;
+    }
+
+    int get_n() {
+        return n;
+    }
+
+    bool* operator[](int);
+
+    ~BooleanMatrix() {
+        for (int i = 0; i < m; i++)
+            delete M[i];
+        delete M;
+    }
+
+};
+
+bool* BooleanMatrix::operator[](int index)
+{
+    return M[index];
+}
 
 class GeneticAlgorithm;
 
@@ -29,19 +57,22 @@ public:
         for(int i=0; i < chromosome_size; i++) {
             chromosome.push_back(d(rng));
         }
-    };
+    }
 
     Individual(std::vector<bool> chromosome)
     {
         this->chromosome = chromosome;
-    };
+    }
 
-
-    template<std::size_t n, std::size_t m>
-    bool is_coverage(std::array<std::array<bool, n>, m>& M)
+    bool is_coverage(BooleanMatrix& M)
     {
+        int m = M.get_m();
+        int n = M.get_n();
         //Sum of all taken columns (by rows, we sum rows) shouldn't include zeros
-        std::array<int, m> rows_sum = {};
+        std::vector<int> rows_sum;
+        for(int i = 0; i < m; i++) {
+            rows_sum.push_back(0);
+        }
         for(int i = 0; i < m; i++) {
             for(int j = 0; j < n; j++) {
                 if(!chromosome[j])
@@ -57,11 +88,12 @@ public:
         }
 
         return true;
-    };
+    }
 
-    template<std::size_t n, std::size_t m>
-    double fitness(std::array<std::array<bool, n>, m>& M)
+    double fitness(BooleanMatrix& M)
     {
+        int m = M.get_m();
+        int n = M.get_n();
         if(!is_coverage(M))
             return n + 1;
 
@@ -70,7 +102,7 @@ public:
             sum += elem;
         }
         return sum;
-    };
+    }
 
     friend GeneticAlgorithm;
     friend std::ostream& operator<<(std::ostream& os, const Individual& I);
@@ -131,7 +163,7 @@ public:
             }
             population.push_back(Individual(new_chromosome));
         };
-    };
+    }
 
     Individual one_point_crossover(Individual s1, Individual s2)
     {
@@ -153,10 +185,11 @@ public:
         }
 
         return Individual(new_chromosome);
-    };
+    }
 
-    template<std::size_t n, std::size_t m>
-    void fit(std::array<std::array<bool, n>, m>& M, int verbose=2, bool finishing_message=true) {
+    void fit(BooleanMatrix& M, int verbose=2, bool finishing_message=true) {
+        int m = M.get_m();
+        int n = M.get_n();
         //CROSSOVER (creating extended population)
         int delta = extended_population_size - population_size;
         int chromosome_len = population[0].chromosome.size();
@@ -218,16 +251,17 @@ public:
         }
         if(finishing_message)
             std::cout << "Learning finished!" << std::endl;
-    };
+    }
 
     std::vector<bool> get_best_chromosome()
     {
         return population[0].chromosome;
-    };
+    }
 
-    template<std::size_t n, std::size_t m>
-    void print_solution(std::array<std::array<bool, n>, m>& M)
+    void print_solution(BooleanMatrix& M)
     {
+        int m = M.get_m();
+        int n = M.get_n();
         if(n > 25) {
             std::cout << "WARNING: Solution output can be too huge." << std::endl;
         }
@@ -243,25 +277,27 @@ public:
             }
             std::cout << std::endl;
         }
-    };
+    }
 };
 
 int main()
 {
+    
     //Create data
-    const int m = 250;
-    const int n = m;
-    std::array<std::array<bool, n>, m> M = {};
+    int m = 250;
+    int n = 250;
+
+    BooleanMatrix M(m, n);
+    // std::cout << M[0][2];
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100
-    GeneticAlgorithm A = GeneticAlgorithm(50, 150, n, 0.15, 100);
+    GeneticAlgorithm A = GeneticAlgorithm(10, 50, n, 0.2, 2);
 
     double p = 0.5;
     std::random_device rd{};
     std::mt19937 rng{rd()};
     std::bernoulli_distribution d(p);
 
-    
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < n; j++) {
             M[i][j] = static_cast<bool> (d(rng));
@@ -269,8 +305,14 @@ int main()
     }
 
 
-    A.fit(M, 2);
+    A.fit(M);
     //A.print_solution(M);
+
+    /*
+    for (int i = 0; i < m; i++)
+        delete M.M[i];
+    delete M.M;
+    */
 
     return 0;
 }
