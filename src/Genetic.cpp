@@ -65,22 +65,18 @@ bool Genetic::Individual::is_coverage(Genetic::BooleanMatrix& M)
 {
     int m = M.get_m();
     int n = M.get_n();
-    //Sum of all taken columns (by rows, we sum rows) shouldn't include zeros
-    std::vector<int> rows_sum;
+
     for(int i = 0; i < m; i++) {
-        rows_sum.push_back(0);
-    }
-    for(int i = 0; i < m; i++) {
+        bool flag = false;
         for(int j = 0; j < n; j++) {
             if(!chromosome[j])
                 continue;
-            rows_sum[i] += M[i][j];
+            if(M[i][j]) {
+                flag = true;
+                break;
+            }
         }
-    }
-
-    for(int i = 0; i < m; i++) {
-        //std::cout << rows_sum[i] << std::endl;
-        if(!rows_sum[i])
+        if(!flag)
             return false;
     }
 

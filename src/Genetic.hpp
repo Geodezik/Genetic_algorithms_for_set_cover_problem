@@ -10,8 +10,6 @@
 namespace Genetic {
     class BooleanMatrix;
     class Individual;
-    class MinCoveringsIndividual;
-
     class GeneticAlgorithm;
     std::ostream& operator<<(std::ostream& os, const Individual& I);
 };
