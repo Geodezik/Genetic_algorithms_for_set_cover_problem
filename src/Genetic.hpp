@@ -10,6 +10,8 @@
 namespace Genetic {
     class BooleanMatrix;
     class Individual;
+    class MinCoveringsIndividual;
+
     class GeneticAlgorithm;
     std::ostream& operator<<(std::ostream& os, const Individual& I);
 };
@@ -34,6 +36,7 @@ class Genetic::Individual {
 public:
     Individual(int chromosome_size);
     Individual(std::vector<bool> chromosome);
+
     bool is_coverage(Genetic::BooleanMatrix& M);
     double fitness(Genetic::BooleanMatrix& M);
 
@@ -57,7 +60,7 @@ class Genetic::GeneticAlgorithm {
 
 public:
     GeneticAlgorithm(int population_size, int extended_population_size, int chromosome_len,
-                     double mutation_proba, int max_iter);
+                     double mutation_proba, int max_iter = 100, std::string task = "min_bool_coverings_1");
     Individual one_point_crossover(Individual s1, Individual s2);
     void fit(BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
     std::vector<bool> get_best_chromosome();

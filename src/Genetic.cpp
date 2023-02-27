@@ -120,7 +120,7 @@ std::vector<int> Genetic::GeneticAlgorithm::argsort(const std::vector<T> &v) {
 }
 
 Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_population_size, int chromosome_len,
-                    double mutation_proba, int max_iter = 100)
+                    double mutation_proba, int max_iter, std::string task)
 {
     this->population_size = population_size;
     this->extended_population_size = extended_population_size;
