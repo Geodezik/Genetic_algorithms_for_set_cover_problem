@@ -107,6 +107,18 @@ std::ostream& Genetic::operator<<(std::ostream& os, const Individual& I)
     return os;
 };
 
+template <typename T>
+std::vector<int> Genetic::GeneticAlgorithm::argsort(const std::vector<T> &v) {
+    //Argsort for any type of elem-comparable vectors
+    std::vector<int> idx(v.size());
+    std::iota(idx.begin(), idx.end(), 0);
+
+    std::stable_sort(idx.begin(), idx.end(),
+        [&v](int i1, int i2) {return v[i1] < v[i2];});
+
+    return idx;
+}
+
 Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_population_size, int chromosome_len,
                     double mutation_proba, int max_iter = 100)
 {
