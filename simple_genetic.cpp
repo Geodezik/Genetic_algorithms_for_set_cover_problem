@@ -10,6 +10,8 @@ class BooleanMatrix {
 public:
     bool** M;
     BooleanMatrix(int m, int n) {
+        this->m = m;
+        this->n = n;
         M = new bool*[m];
         for (int i = 0; i < m; i++)
             M[i] = new bool[n];
@@ -92,10 +94,8 @@ public:
 
     double fitness(BooleanMatrix& M)
     {
-        int m = M.get_m();
-        int n = M.get_n();
         if(!is_coverage(M))
-            return n + 1;
+            return M.get_n() + 1;
 
         int sum = 0;
         for(auto elem: chromosome) {
@@ -188,8 +188,6 @@ public:
     }
 
     void fit(BooleanMatrix& M, int verbose=2, bool finishing_message=true) {
-        int m = M.get_m();
-        int n = M.get_n();
         //CROSSOVER (creating extended population)
         int delta = extended_population_size - population_size;
         int chromosome_len = population[0].chromosome.size();
@@ -284,14 +282,22 @@ int main()
 {
     
     //Create data
-    int m = 250;
-    int n = 250;
+    int m = 6;
+    int n = 6;
 
+    bool Matrix[6][6] = {
+        {0, 1, 1, 1, 1, 0},
+        {1, 0, 1, 0, 0, 0},
+        {0, 0, 1, 0, 0, 1},
+        {0, 1, 1, 1, 1, 0},
+        {0, 0, 1, 0, 1, 0},
+        {0, 0, 1, 1, 1, 0}
+    };
     BooleanMatrix M(m, n);
     // std::cout << M[0][2];
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100
-    GeneticAlgorithm A = GeneticAlgorithm(10, 50, n, 0.2, 2);
+    GeneticAlgorithm A = GeneticAlgorithm(3, 6, n, 0.2, 100);
 
     double p = 0.5;
     std::random_device rd{};
@@ -300,13 +306,14 @@ int main()
 
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < n; j++) {
-            M[i][j] = static_cast<bool> (d(rng));
+            //M[i][j] = static_cast<bool> (d(rng));
+            M[i][j] = Matrix[i][j];
         }
     }
 
 
     A.fit(M);
-    //A.print_solution(M);
+    A.print_solution(M);
 
     /*
     for (int i = 0; i < m; i++)
