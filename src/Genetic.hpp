@@ -1,3 +1,6 @@
+#ifndef GENETIC_H
+#define GENETIC_H
+
 #include <iostream>
 #include <vector>
 #include <random>
@@ -65,7 +68,9 @@ public:
     GeneticAlgorithm(int population_size, int extended_population_size, int chromosome_len,
                      double mutation_proba, int max_iter);
     Individual one_point_crossover(Individual s1, Individual s2);
-    void fit(BooleanMatrix& M, int verbose, bool finishing_message);
+    void fit(BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
     std::vector<bool> get_best_chromosome();
     void print_solution(BooleanMatrix& M);
 };
+
+#endif

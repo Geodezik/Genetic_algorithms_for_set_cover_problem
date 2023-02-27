@@ -1,10 +1,6 @@
 #include "Genetic.hpp"
-/*
-#include <vector>
-#include <random>
-#include <numeric>
-#include <algorithm>
-*/
+#include <iostream>
+
 using namespace Genetic;
 
 int main()
@@ -14,7 +10,7 @@ int main()
     int m = 6;
     int n = 6;
 
-    bool Matrix[6][6] = {
+    bool Matrix[m][n] = {
         {0, 1, 1, 1, 1, 0},
         {1, 0, 1, 0, 0, 0},
         {0, 0, 1, 0, 0, 1},

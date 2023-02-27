@@ -154,7 +154,7 @@ Genetic::Individual Genetic::GeneticAlgorithm::one_point_crossover(Individual s1
     return Individual(new_chromosome);
 }
 
-void Genetic::GeneticAlgorithm::fit(BooleanMatrix& M, int verbose=2, bool finishing_message=true) {
+void Genetic::GeneticAlgorithm::fit(BooleanMatrix& M, int verbose, bool finishing_message) {
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
     int chromosome_len = population[0].chromosome.size();
