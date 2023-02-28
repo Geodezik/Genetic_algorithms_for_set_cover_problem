@@ -10,7 +10,7 @@ int main()
     int m = 500;
     int n = 500;
 
-    double p = 0.5;
+    double p = 0.15;
     std::random_device rd{};
     std::mt19937 rng{rd()};
     std::bernoulli_distribution d(p);
