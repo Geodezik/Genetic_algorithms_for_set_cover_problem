@@ -8,12 +8,14 @@ using namespace Genetic;
 
 int main()
 {
-    int m = 500;
-    int n = 500;
+    int SEED = 317;
+    int m = 250;
+    int n = 250;
 
     double p = 0.15;
     std::random_device rd{};
     std::mt19937 rng{rd()};
+    rng.seed(SEED;);
     std::bernoulli_distribution d(p);
 
     /*
