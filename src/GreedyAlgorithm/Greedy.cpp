@@ -25,7 +25,7 @@ int Greedy::GreedyAlgorithm::get_argmax_score(int *scores, int n)
     int argmax_score = 0;
     for(int i = 0; i < n; i++) {
         if(scores[i] > max_score) {
-            max_scores = scores[i];
+            max_score = scores[i];
             argmax_score = i;
         }
     }
@@ -53,16 +53,17 @@ void Greedy::GreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
     int scores[n] = {};
     int not_covered_counter = m;
 
-    while(!not_covered_counter) {
+    while(not_covered_counter) {
         for(int j = 0; j < n; j++)
             scores[j] = get_column_score(M, j, row_is_covered);
-        argmax_score = get_argmax_score(scores, n);
+        int argmax_score = get_argmax_score(scores, n);
         update(M, argmax_score, row_is_covered, not_covered_counter);
         columns.push_back(argmax_score);
     }
     
 }
-void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
+
+void Greedy::GreedyAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
     int m = M.get_m();
     int n = M.get_n();
@@ -71,7 +72,7 @@ void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
     }
 
     std::cout << "Coverage: " << std::endl;
-    for(auto elem: columns) {
+    for(auto elem: this->columns) {
             std::cout << elem << " ";
     }
     std::cout << std::endl;
