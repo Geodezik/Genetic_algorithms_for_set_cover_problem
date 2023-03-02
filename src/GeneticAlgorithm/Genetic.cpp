@@ -1,46 +1,5 @@
 #include "Genetic.hpp"
 
-Genetic::BooleanMatrix::BooleanMatrix(int m, int n) {
-    this->m = m;
-    this->n = n;
-    M = new bool*[m];
-    for (int i = 0; i < m; i++)
-        M[i] = new bool[n];
-}
-
-Genetic::BooleanMatrix::BooleanMatrix(const BooleanMatrix& B) {
-    std::cout << "WARNING: detected attempt to copy an object of BooleanMatrix. ";
-    std::cout << "This operation is very time-consuming, use references instead." << std::endl;
-    this->m = B.m;
-    this->n = B.n;
-    this->M = new bool*[m];
-    for (int i = 0; i < m; i++) {
-        this->M[i] = new bool[n];
-        for(int j = 0; j < n; j++) {
-            this->M[i][j] = B.M[i][j];
-        }
-    }
-}
-
-int Genetic::BooleanMatrix::get_m() {
-    return m;
-}
-
-int Genetic::BooleanMatrix::get_n() {
-    return n;
-}
-
-Genetic::BooleanMatrix::~BooleanMatrix() {
-    for (int i = 0; i < m; i++)
-        delete M[i];
-    delete M;
-}
-
-bool* Genetic::BooleanMatrix::operator[](int index)
-{
-    return M[index];
-}
-
 Genetic::Individual::Individual(int chromosome_size)
 {
     double p = 0.5;
@@ -61,7 +20,7 @@ Genetic::Individual::Individual(std::vector<bool> chromosome)
     this->chromosome = chromosome;
 }
 
-bool Genetic::Individual::is_coverage(Genetic::BooleanMatrix& M)
+bool Genetic::Individual::is_coverage(BooleanMatrix::BooleanMatrix& M)
 {
     int m = M.get_m();
     int n = M.get_n();
@@ -83,7 +42,7 @@ bool Genetic::Individual::is_coverage(Genetic::BooleanMatrix& M)
     return true;
 }
 
-double Genetic::Individual::fitness(Genetic::BooleanMatrix& M)
+double Genetic::Individual::fitness(BooleanMatrix::BooleanMatrix& M)
 {
     if(!is_coverage(M))
         return M.get_n() + 1;
@@ -162,7 +121,7 @@ Genetic::Individual Genetic::GeneticAlgorithm::one_point_crossover(Individual s1
     return Individual(new_chromosome);
 }
 
-void Genetic::GeneticAlgorithm::fit(BooleanMatrix& M, int verbose, bool finishing_message) {
+void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
     int chromosome_len = population[0].chromosome.size();
@@ -234,7 +193,7 @@ std::vector<bool> Genetic::GeneticAlgorithm::get_best_chromosome()
     return population[0].chromosome;
 }
 
-void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix& M)
+void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
     int m = M.get_m();
     int n = M.get_n();

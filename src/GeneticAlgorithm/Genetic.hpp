@@ -6,26 +6,12 @@
 #include <random>
 #include <numeric>
 #include <algorithm>
+#include "BooleanMatrix.hpp"
 
 namespace Genetic {
-    class BooleanMatrix;
     class Individual;
     class GeneticAlgorithm;
     std::ostream& operator<<(std::ostream& os, const Individual& I);
-};
-
-class Genetic::BooleanMatrix {
-    int m;
-    int n;
-public:
-    bool** M;
-    BooleanMatrix(int m, int n);
-    BooleanMatrix(const BooleanMatrix& B);
-    int get_m();
-    int get_n();
-    bool* operator[](int);
-    ~BooleanMatrix();
-
 };
 
 class Genetic::Individual {
@@ -35,8 +21,8 @@ public:
     Individual(int chromosome_size);
     Individual(std::vector<bool> chromosome);
 
-    bool is_coverage(Genetic::BooleanMatrix& M);
-    double fitness(Genetic::BooleanMatrix& M);
+    bool is_coverage(BooleanMatrix::BooleanMatrix& M);
+    double fitness(BooleanMatrix::BooleanMatrix& M);
 
     friend Genetic::GeneticAlgorithm;
     friend std::ostream& Genetic::operator<<(std::ostream& os, const Genetic::Individual& I);
@@ -60,9 +46,9 @@ public:
     GeneticAlgorithm(int population_size, int extended_population_size, int chromosome_len,
                      double mutation_proba, int max_iter = 100, std::string task = "min_bool_coverings_1");
     Individual one_point_crossover(Individual s1, Individual s2);
-    void fit(BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
+    void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
     std::vector<bool> get_best_chromosome();
-    void print_solution(BooleanMatrix& M);
+    void print_solution(BooleanMatrix::BooleanMatrix& M);
 };
 
 #endif
