@@ -10,7 +10,9 @@ class Greedy::GreedyAlgorithm {
 
     int get_column_score(BooleanMatrix::BooleanMatrix& M, int j);
     int get_argmax_score(int *scores, int n);
+    void update(BooleanMatrix::BooleanMatrix& M, int j, bool* row_is_covered, int &not_covered_counter);
 public:
     GreedyAlgorithm();
     void fit(BooleanMatrix::BooleanMatrix& M);
+    void print_solution(BooleanMatrix::BooleanMatrix& M);
 }
