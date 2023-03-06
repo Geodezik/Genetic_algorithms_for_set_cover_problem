@@ -169,7 +169,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         }
 
         //Mutate
-        int mutations = 25;
+        int mutations = 1000;
         for(int mut_iter = 0; mut_iter < mutations; mut_iter++) {
             std::bernoulli_distribution bernoulli_d(mutation_proba);
             std::uniform_int_distribution<> genes_d(0, chromosome_len - 1);
@@ -276,18 +276,21 @@ void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 
 void Genetic::GeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M)
 {
-    std::cout << "Analyzing..." << std::endl;
+    int m = M.get_m();
+    int n = M.get_n();
 
     std::vector<int> scores;
     int chromosome_len = population[0].size();
+
+    std::cout << "Analyzing..." << std::endl;
     for(int j = 0; j < population_size; j++) {
+        int fitness = population[j].fitness(M);
         std::cout << j + 1 << ") ";
-        std::cout << "Fitness: " << population[j].fitness(M) << ',';
-        int zeros_counter = 0;
-        for(int i = 0; i < chromosome_len; i++) {
-            if(!population[j].chromosome[i])
-                zeros_counter++;
+        std::cout << "Fitness: " << fitness << ',';
+        if(fitness < n + 1) {
+            std::cout << " columns not included: " << n - fitness << std::endl;
+        } else {
+            std::cout << " not a covering" << std::endl;
         }
-        std::cout << " columns not included: " << zeros_counter << std::endl; 
     }
 }

@@ -8,8 +8,8 @@ using namespace Genetic;
 
 int main()
 {
-    int m = 5000;
-    int n = 5000;
+    int m = 2500;
+    int n = 7500;
 
     double p = 0.001;
     std::random_device rd{};
@@ -44,7 +44,7 @@ int main()
     }
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100, str task
-    GeneticAlgorithm A = GeneticAlgorithm(25, 100, n, 0.5, 5);
+    GeneticAlgorithm A = GeneticAlgorithm(25, 100, n, 1.0, 5);
     // A.print_individuals();
     A.fit(M);
     A.analyze_solution(M);
