@@ -16,11 +16,13 @@ namespace Genetic {
 
 class Genetic::Individual {
     std::vector<bool> chromosome;
+    bool first_gen;
 
 public:
-    Individual(int chromosome_size);
-    Individual(std::vector<bool> chromosome);
+    Individual(int chromosome_size, bool first_gen=false);
+    Individual(std::vector<bool> chromosome, bool first_gen=false);
 
+    int size();
     bool is_coverage(BooleanMatrix::BooleanMatrix& M);
     double fitness(BooleanMatrix::BooleanMatrix& M);
 
@@ -48,7 +50,9 @@ public:
     Individual one_point_crossover(Individual s1, Individual s2);
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
     std::vector<bool> get_best_chromosome();
+    void print_individuals();
     void print_solution(BooleanMatrix::BooleanMatrix& M);
+    void analyze_solution(BooleanMatrix::BooleanMatrix& M);
 };
 
 #endif

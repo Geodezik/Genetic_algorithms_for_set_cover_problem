@@ -77,3 +77,9 @@ void Greedy::GreedyAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
     }
     std::cout << std::endl;
 }
+
+void Greedy::GreedyAlgorithm::analyze()
+{
+    std::cout << "Analyzing..." << std::endl;
+    std::cout << "Covering length: " << columns.size() << std::endl;
+}

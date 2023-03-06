@@ -8,14 +8,13 @@ using namespace Genetic;
 
 int main()
 {
-    int SEED = 317;
-    int m = 250;
-    int n = 250;
+    int m = 5000;
+    int n = 5000;
 
-    double p = 0.15;
+    double p = 0.001;
     std::random_device rd{};
     std::mt19937 rng{rd()};
-    rng.seed(SEED;);
+    rng.seed(317);
     std::bernoulli_distribution d(p);
 
     /*
@@ -38,13 +37,17 @@ int main()
         for(int j = 0; j < n; j++) {
             M[i][j] = static_cast<bool> (d(rng));
             //M[i][j] = Matrix[i][j];
-        }BooleanMatrix.o
+            //M[i][j] = false;
+            if (i == j)
+                M[i][j] = true;
+        }
     }
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100, str task
-    GeneticAlgorithm A = GeneticAlgorithm(50, 500, n, 0.2, 100);
+    GeneticAlgorithm A = GeneticAlgorithm(25, 100, n, 0.5, 5);
+    // A.print_individuals();
     A.fit(M);
-    //A.print_solution(M);
+    A.analyze_solution(M);
 
     return 0;
 }

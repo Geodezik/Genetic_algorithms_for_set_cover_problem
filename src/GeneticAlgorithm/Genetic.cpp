@@ -1,7 +1,8 @@
 #include "Genetic.hpp"
 
-Genetic::Individual::Individual(int chromosome_size)
+Genetic::Individual::Individual(int chromosome_size, bool first_gen)
 {
+    this->first_gen = first_gen;
     double p = 0.5;
 
     std::random_device rd{};
@@ -15,9 +16,15 @@ Genetic::Individual::Individual(int chromosome_size)
     }
 }
 
-Genetic::Individual::Individual(std::vector<bool> chromosome)
+Genetic::Individual::Individual(std::vector<bool> chromosome, bool first_gen)
 {
+    this->first_gen = first_gen;
     this->chromosome = chromosome;
+}
+
+int Genetic::Individual::size()
+{
+    return chromosome.size();
 }
 
 bool Genetic::Individual::is_coverage(BooleanMatrix::BooleanMatrix& M)
@@ -44,14 +51,33 @@ bool Genetic::Individual::is_coverage(BooleanMatrix::BooleanMatrix& M)
 
 double Genetic::Individual::fitness(BooleanMatrix::BooleanMatrix& M)
 {
-    if(!is_coverage(M))
-        return M.get_n() + 1;
+    int m = M.get_m();
+    int n = M.get_n();
 
-    int sum = 0;
-    for(auto elem: chromosome) {
-        sum += elem;
+    if(first_gen)
+        return 0;
+
+    for(int i = 0; i < m; i++) {
+        bool flag = false;
+        for(int j = 0; j < n; j++) {
+            // gene in set and elem in M is 1
+            if(chromosome[j] && M[i][j]) {
+                flag = true;
+                break;
+            }
+        }
+        if(!flag)
+            return n + 1;
     }
-    return sum;
+
+    // cheap???
+    int ones_counter = 0;
+    for(int i = 0; i < size(); i++) {
+        if(chromosome[i])
+            ones_counter++;
+    }
+
+    return ones_counter;
 }
 
 std::ostream& Genetic::operator<<(std::ostream& os, const Individual& I)
@@ -82,7 +108,7 @@ Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_po
     this->max_iter = max_iter;
     this->mutation_proba =  mutation_proba;
 
-    double p = 0.5;
+    double p = 1.0;
 
     std::random_device rd{};
     std::mt19937 random_engine{rd()};
@@ -122,6 +148,9 @@ Genetic::Individual Genetic::GeneticAlgorithm::one_point_crossover(Individual s1
 }
 
 void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
+    int m = M.get_m();
+    int n = M.get_n();
+
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
     int chromosome_len = population[0].chromosome.size();
@@ -140,17 +169,19 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         }
 
         //Mutate
-        std::bernoulli_distribution bernoulli_d(mutation_proba);
-        std::uniform_int_distribution<> genes_d(0, chromosome_len - 1);
-        for(int j = 0; j < extended_population_size; j++) {
-            bool mutate = bernoulli_d(rng);
-            if(!mutate)
-                continue;
+        int mutations = 25;
+        for(int mut_iter = 0; mut_iter < mutations; mut_iter++) {
+            std::bernoulli_distribution bernoulli_d(mutation_proba);
+            std::uniform_int_distribution<> genes_d(0, chromosome_len - 1);
+            for(int j = population_size + 1; j < extended_population_size; j++) {
+                bool mutate = bernoulli_d(rng);
+                if(!mutate)
+                    continue;
 
-            int random_gen = genes_d(rng);
-            extended_population[j].chromosome[random_gen] = !extended_population[j].chromosome[random_gen];
+                int random_gen = genes_d(rng);
+                extended_population[j].chromosome[random_gen] = !extended_population[j].chromosome[random_gen];
+            }
         }
-
 
         //Get scores
         std::vector<double> scores;
@@ -175,7 +206,29 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         }
 
         std::vector<Individual> best;
-        for(int j = 0; j < population_size; j++) {
+
+        // first include non-firstgen that are coverings
+        for(int j = 0; j < extended_population_size; j++) {
+            if(best.size() == population_size)
+                break;
+            if(extended_population[argbest[j]].first_gen || (scores[j] > n))
+                continue;
+            best.push_back(extended_population[argbest[j]]);
+        }
+
+        // second include firstgen
+        for(int j = 0; j < extended_population_size; j++) {
+            if(best.size() == population_size)
+                break;
+            if(scores[j] > n)
+                continue;
+            best.push_back(extended_population[argbest[j]]);
+        }
+
+        // third include non-coverings
+        for(int j = 0; j < extended_population_size; j++) {
+            if(best.size() == population_size)
+                break;
             best.push_back(extended_population[argbest[j]]);
         }
 
@@ -193,11 +246,18 @@ std::vector<bool> Genetic::GeneticAlgorithm::get_best_chromosome()
     return population[0].chromosome;
 }
 
+void Genetic::GeneticAlgorithm::print_individuals()
+{
+    for(int i =0; i < population_size; i++) {
+        std::cout << population[i] << std::endl;
+    }
+}
+
 void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
     int m = M.get_m();
     int n = M.get_n();
-    if(n > 25) {
+    if(n > 100) {
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
     }
 
@@ -211,5 +271,23 @@ void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
             std::cout << M[i][j] << " ";
         }
         std::cout << std::endl;
+    }
+}
+
+void Genetic::GeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M)
+{
+    std::cout << "Analyzing..." << std::endl;
+
+    std::vector<int> scores;
+    int chromosome_len = population[0].size();
+    for(int j = 0; j < population_size; j++) {
+        std::cout << j + 1 << ") ";
+        std::cout << "Fitness: " << population[j].fitness(M) << ',';
+        int zeros_counter = 0;
+        for(int i = 0; i < chromosome_len; i++) {
+            if(!population[j].chromosome[i])
+                zeros_counter++;
+        }
+        std::cout << " columns not included: " << zeros_counter << std::endl; 
     }
 }

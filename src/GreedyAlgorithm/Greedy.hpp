@@ -19,6 +19,7 @@ public:
     GreedyAlgorithm();
     void fit(BooleanMatrix::BooleanMatrix& M);
     void print_solution(BooleanMatrix::BooleanMatrix& M);
+    void analyze();
 };
 
 #endif
