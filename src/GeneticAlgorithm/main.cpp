@@ -38,8 +38,8 @@ int main()
             M[i][j] = static_cast<bool> (d(rng));
             //M[i][j] = Matrix[i][j];
             //M[i][j] = false;
-            if (i == j)
-                M[i][j] = true;
+            //if (i == j)
+                //M[i][j] = true;
         }
     }
 
