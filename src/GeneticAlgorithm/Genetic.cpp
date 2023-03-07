@@ -169,7 +169,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         }
 
         //Mutate
-        int mutations = 1000;
+        int mutations = 500;
         for(int mut_iter = 0; mut_iter < mutations; mut_iter++) {
             std::bernoulli_distribution bernoulli_d(mutation_proba);
             std::uniform_int_distribution<> genes_d(0, chromosome_len - 1);

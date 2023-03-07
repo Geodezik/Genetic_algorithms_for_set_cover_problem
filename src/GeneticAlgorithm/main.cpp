@@ -15,7 +15,8 @@ int main()
     std::random_device rd{};
     std::mt19937 rng{rd()};
     rng.seed(317);
-    std::bernoulli_distribution d(p);
+    std::bernoulli_distribution bd(p);
+    std::uniform_int_distribution<> uid(2, 2163);
 
     /*
     bool Matrix[m][n] = {
@@ -35,16 +36,14 @@ int main()
     BooleanMatrix::BooleanMatrix M(m, n);
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < n; j++) {
-            M[i][j] = static_cast<bool> (d(rng));
+            M[i][j] = static_cast<bool> (bd(rng));
             //M[i][j] = Matrix[i][j];
-            //M[i][j] = false;
-            //if (i == j)
-                //M[i][j] = true;
         }
+        M[i][uid(rng)] = true;
     }
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100, str task
-    GeneticAlgorithm A = GeneticAlgorithm(25, 100, n, 1.0, 5);
+    GeneticAlgorithm A = GeneticAlgorithm(5, 50, n, 1.0, 25);
     // A.print_individuals();
     A.fit(M);
     A.analyze_solution(M);
