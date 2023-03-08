@@ -134,6 +134,7 @@ Genetic::Individual Genetic::GeneticAlgorithm::one_point_crossover(Individual s1
 }
 
 void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
+    std::time_t start = std::time(nullptr);
     int m = M.get_m();
     int n = M.get_n();
 
@@ -155,7 +156,9 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         }
 
         //Mutate
-        int mutations = 500;
+        int mutations = 1000 - i * 250;
+        if(mutations < 50)
+            mutations = 50;
         for(int mut_iter = 0; mut_iter < mutations; mut_iter++) {
             std::bernoulli_distribution bernoulli_d(mutation_proba);
             std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
@@ -220,11 +223,14 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
 
         population = best;
     }
+
+    std::time_t finish = std::time(nullptr);
+    fit_time =  finish - start;
+
     if(finishing_message) {
-        std::cout << "Learning finished!" << std::endl;
+        std::cout << "Learning finished in " << fit_time << " s" << std::endl;
         std::cout << std::endl;
     }
-
 }
 
 std::vector<bool> Genetic::GeneticAlgorithm::get_best_individual()
@@ -279,4 +285,12 @@ void Genetic::GeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M
             std::cout << " not a covering" << std::endl;
         }
     }
+}
+
+void Genetic::GeneticAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
+{
+  std::ofstream f;
+  f.open(filename, std::ofstream::app);
+  f << fit_time << " " << population[0].fitness(M) << '\n';
+  f.close();
 }

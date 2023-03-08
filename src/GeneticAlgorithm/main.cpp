@@ -8,7 +8,7 @@ using namespace Genetic;
 
 int main()
 {
-    int m = 2500;
+    int m = 7500;
     int n = 7500;
 
     double p = 0.001;
@@ -43,10 +43,11 @@ int main()
     }
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100, str task
-    GeneticAlgorithm A = GeneticAlgorithm(5, 50, n, 1.0, 25);
+    GeneticAlgorithm A = GeneticAlgorithm(5, 10, n, 1.0, 1);
     // A.print_individuals();
-    A.fit(M);
+    A.fit(M, 2, false);
     A.analyze_solution(M);
+    A.print_fit_stats(M);
 
     return 0;
 }

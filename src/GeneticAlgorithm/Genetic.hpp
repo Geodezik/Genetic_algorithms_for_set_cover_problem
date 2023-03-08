@@ -2,10 +2,12 @@
 #define GENETIC_H
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <random>
 #include <numeric>
 #include <algorithm>
+#include <ctime>
 #include "BooleanMatrix.hpp"
 
 namespace Genetic {
@@ -41,6 +43,8 @@ class Genetic::GeneticAlgorithm {
     int extended_population_size;
     double mutation_proba;
 
+    double fit_time;
+
     template <typename T>
     std::vector<int> argsort(const std::vector<T> &v);
 
@@ -53,6 +57,7 @@ public:
     void print_individuals();
     void print_solution(BooleanMatrix::BooleanMatrix& M);
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
+    void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename="results.txt");
 };
 
 #endif
