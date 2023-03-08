@@ -19,8 +19,8 @@ class Genetic::Individual {
     bool first_gen;
 
 public:
-    Individual(int chromosome_size, bool first_gen=false);
-    Individual(std::vector<bool> chromosome, bool first_gen=false);
+    Individual(int chromosome_size, bool first_gen=false, double p=1.0);
+    Individual(std::vector<bool> chromosome, bool first_gen=false, double p=1.0);
 
     int size();
     bool is_coverage(BooleanMatrix::BooleanMatrix& M);

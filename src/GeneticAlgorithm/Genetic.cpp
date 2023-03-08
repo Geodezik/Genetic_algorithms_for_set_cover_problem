@@ -1,6 +1,6 @@
 #include "Genetic.hpp"
 
-Genetic::Individual::Individual(int chromosome_size, bool first_gen, double p=1.0)
+Genetic::Individual::Individual(int chromosome_size, bool first_gen, double p)
 {
     this->first_gen = first_gen;
 
@@ -15,7 +15,7 @@ Genetic::Individual::Individual(int chromosome_size, bool first_gen, double p=1.
     }
 }
 
-Genetic::Individual::Individual(std::vector<bool> chromosome, bool first_gen, double p=1.0)
+Genetic::Individual::Individual(std::vector<bool> chromosome, bool first_gen, double p)
 {
     this->first_gen = first_gen;
     this->chromosome = chromosome;
