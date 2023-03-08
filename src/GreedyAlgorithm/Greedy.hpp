@@ -2,8 +2,10 @@
 #define GREEDY_H
 
 #include <vector>
-#include "BooleanMatrix.hpp"
+#include <ctime>
+#include <fstream>
 #include <random>
+#include "BooleanMatrix.hpp"
 
 namespace Greedy {
     class GreedyAlgorithm;
@@ -11,6 +13,7 @@ namespace Greedy {
 
 class Greedy::GreedyAlgorithm {
     std::vector<int> columns;
+    double fit_time;
 
     int get_column_score(BooleanMatrix::BooleanMatrix& M, int j, bool* row_is_covered);
     int get_argmax_score(int *scores, int n);
@@ -20,6 +23,7 @@ public:
     void fit(BooleanMatrix::BooleanMatrix& M);
     void print_solution(BooleanMatrix::BooleanMatrix& M);
     void analyze();
+    void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename="results.txt");
 };
 
 #endif

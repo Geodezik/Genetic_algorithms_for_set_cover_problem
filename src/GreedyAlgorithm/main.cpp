@@ -6,15 +6,15 @@ using namespace Greedy;
 
 int main()
 {
-    int m = 2500;
-    int n = 7500;
+    int m = 500;
+    int n = 500;
 
-    double p = 0.001;
+    double p = 0.1;
     std::random_device rd{};
     std::mt19937 rng{rd()};
     rng.seed(317);
     std::bernoulli_distribution bd(p);
-    std::uniform_int_distribution<> uid(2, 2163);
+    std::uniform_int_distribution<> uid(2, 216);
 
     /*
     bool Matrix[m][n] = {
@@ -44,6 +44,7 @@ int main()
     A.fit(M);
     //A.print_solution(M);
     A.analyze();
+    A.print_fit_stats(M);
 
     return 0;
 }

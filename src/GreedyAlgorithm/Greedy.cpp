@@ -46,6 +46,7 @@ void Greedy::GreedyAlgorithm::update(BooleanMatrix::BooleanMatrix& M, int j, boo
 
 void Greedy::GreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
 {
+    std::time_t start = std::time(nullptr);
     int m = M.get_m();
     int n = M.get_n();
 
@@ -60,14 +61,15 @@ void Greedy::GreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
         update(M, argmax_score, row_is_covered, not_covered_counter);
         columns.push_back(argmax_score);
     }
-    
+    std::time_t finish = std::time(nullptr);
+    fit_time = finish - start;
 }
 
 void Greedy::GreedyAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
     int m = M.get_m();
     int n = M.get_n();
-    if(n > 25) {
+    if(n > 100) {
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
     }
 
@@ -82,4 +84,12 @@ void Greedy::GreedyAlgorithm::analyze()
 {
     std::cout << "Analyzing..." << std::endl;
     std::cout << "Covering length: " << columns.size() << std::endl;
+}
+
+void Greedy::GreedyAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
+{
+  std::ofstream f;
+  f.open(filename, std::ofstream::app);
+  f << fit_time << " " << columns.size() << '\n';
+  f.close();
 }
