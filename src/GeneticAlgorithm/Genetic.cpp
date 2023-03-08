@@ -1,6 +1,6 @@
 #include "Genetic.hpp"
 
-Genetic::Individual::Individual(int chromosome_size, bool first_gen, double p)
+Genetic::Individual::Individual(int genotype_size, bool first_gen, double p)
 {
     this->first_gen = first_gen;
 
@@ -8,22 +8,22 @@ Genetic::Individual::Individual(int chromosome_size, bool first_gen, double p)
     std::mt19937 rng{rd()};
     std::bernoulli_distribution d(p);
 
-    //creating chromosome from random bits
-    chromosome = std::vector<bool>();
-    for(int i=0; i < chromosome_size; i++) {
-        chromosome.push_back(d(rng));
+    //creating chromosomes from random bits
+    genotype = std::vector<bool>();
+    for(int i=0; i < genotype_size; i++) {
+        genotype.push_back(d(rng));
     }
 }
 
-Genetic::Individual::Individual(std::vector<bool> chromosome, bool first_gen, double p)
+Genetic::Individual::Individual(std::vector<bool> genotype, bool first_gen, double p)
 {
     this->first_gen = first_gen;
-    this->chromosome = chromosome;
+    this->genotype = genotype;
 }
 
 int Genetic::Individual::size()
 {
-    return chromosome.size();
+    return genotype.size();
 }
 
 bool Genetic::Individual::is_coverage(BooleanMatrix::BooleanMatrix& M)
@@ -34,7 +34,7 @@ bool Genetic::Individual::is_coverage(BooleanMatrix::BooleanMatrix& M)
     for(int i = 0; i < m; i++) {
         bool flag = false;
         for(int j = 0; j < n; j++) {
-            if(!chromosome[j])
+            if(!genotype[j])
                 continue;
             if(M[i][j]) {
                 flag = true;
@@ -60,7 +60,7 @@ double Genetic::Individual::fitness(BooleanMatrix::BooleanMatrix& M)
         bool flag = false;
         for(int j = 0; j < n; j++) {
             // gene in set and elem in M is 1
-            if(chromosome[j] && M[i][j]) {
+            if(genotype[j] && M[i][j]) {
                 flag = true;
                 break;
             }
@@ -72,7 +72,7 @@ double Genetic::Individual::fitness(BooleanMatrix::BooleanMatrix& M)
     // cheap???
     int ones_counter = 0;
     for(int i = 0; i < size(); i++) {
-        if(chromosome[i])
+        if(genotype[i])
             ones_counter++;
     }
 
@@ -81,8 +81,8 @@ double Genetic::Individual::fitness(BooleanMatrix::BooleanMatrix& M)
 
 std::ostream& Genetic::operator<<(std::ostream& os, const Individual& I)
 {
-    for(int i = 0; i < I.chromosome.size(); i++) {
-        os << I.chromosome[i] << " ";
+    for(int i = 0; i < I.genotype.size(); i++) {
+        os << I.genotype[i] << " ";
     }
     return os;
 };
@@ -99,7 +99,7 @@ std::vector<int> Genetic::GeneticAlgorithm::argsort(const std::vector<T> &v) {
     return idx;
 }
 
-Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_population_size, int chromosome_len,
+Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_population_size, int genotype_len,
                     double mutation_proba, int max_iter, std::string task)
 {
     this->population_size = population_size;
@@ -109,28 +109,28 @@ Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_po
 
     //creating zero generation with some genes
     for(int i = 0; i < population_size; i++) {
-        population.push_back(Individual());
+        population.push_back(Individual(genotype_len));
     };
 }
 
 Genetic::Individual Genetic::GeneticAlgorithm::one_point_crossover(Individual s1, Individual s2)
 {
-    // pick a random point (but not at the end of a chromosome), then
+    // pick a random point (but not at the end of a chromosomes), then
     // join two parts from different parents
-    std::vector<bool> new_chromosome;
-    int length = s1.chromosome.size();
+    std::vector<bool> new_genotype;
+    int length = s1.genotype.size();
     std::uniform_int_distribution<> d(1, length - 1);
     int point = d(rng);
 
     for(int i = 0; i < point; i++) {
-        new_chromosome.push_back(s1.chromosome[i]);
+        new_genotype.push_back(s1.genotype[i]);
     }
 
     for(int i = point; i < length; i++) {
-        new_chromosome.push_back(s2.chromosome[i]);
+        new_genotype.push_back(s2.genotype[i]);
     }
 
-    return Individual(new_chromosome);
+    return Individual(new_genotype);
 }
 
 void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
@@ -139,7 +139,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
 
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
-    int chromosome_len = population[0].chromosome.size();
+    int genotype_len = population[0].genotype.size();
     std::uniform_int_distribution<> parents_d(0, population_size - 1);
 
     for(int i = 0; i < max_iter; i++) {
@@ -158,14 +158,14 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         int mutations = 500;
         for(int mut_iter = 0; mut_iter < mutations; mut_iter++) {
             std::bernoulli_distribution bernoulli_d(mutation_proba);
-            std::uniform_int_distribution<> genes_d(0, chromosome_len - 1);
+            std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
             for(int j = population_size + 1; j < extended_population_size; j++) {
                 bool mutate = bernoulli_d(rng);
                 if(!mutate)
                     continue;
 
                 int random_gen = genes_d(rng);
-                extended_population[j].chromosome[random_gen] = !extended_population[j].chromosome[random_gen];
+                extended_population[j].genotype[random_gen] = !extended_population[j].genotype[random_gen];
             }
         }
 
@@ -227,9 +227,9 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
 
 }
 
-std::vector<bool> Genetic::GeneticAlgorithm::get_best_chromosome()
+std::vector<bool> Genetic::GeneticAlgorithm::get_best_individual()
 {
-    return population[0].chromosome;
+    return population[0].genotype;
 }
 
 void Genetic::GeneticAlgorithm::print_individuals()
@@ -247,9 +247,9 @@ void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
     }
 
-    std::cout << "Best chromosome: " << get_best_chromosome() << std::endl;
+    std::cout << "Best individual: " << get_best_individual() << std::endl;
     std::cout << "Coverage: " << std::endl;
-    std::vector<bool> best = get_best_chromosome();
+    std::vector<bool> best = get_best_individual();
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < n; j++) {
             if(!best[j])
@@ -266,7 +266,7 @@ void Genetic::GeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M
     int n = M.get_n();
 
     std::vector<int> scores;
-    int chromosome_len = population[0].size();
+    int genotype_len = population[0].size();
 
     std::cout << "Analyzing..." << std::endl;
     for(int j = 0; j < population_size; j++) {
