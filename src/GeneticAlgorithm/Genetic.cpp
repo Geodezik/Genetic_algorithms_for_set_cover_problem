@@ -1,9 +1,8 @@
 #include "Genetic.hpp"
 
-Genetic::Individual::Individual(int chromosome_size, bool first_gen)
+Genetic::Individual::Individual(int chromosome_size, bool first_gen, double p=1.0)
 {
     this->first_gen = first_gen;
-    double p = 0.5;
 
     std::random_device rd{};
     std::mt19937 rng{rd()};
@@ -16,7 +15,7 @@ Genetic::Individual::Individual(int chromosome_size, bool first_gen)
     }
 }
 
-Genetic::Individual::Individual(std::vector<bool> chromosome, bool first_gen)
+Genetic::Individual::Individual(std::vector<bool> chromosome, bool first_gen, double p=1.0)
 {
     this->first_gen = first_gen;
     this->chromosome = chromosome;
@@ -108,20 +107,9 @@ Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_po
     this->max_iter = max_iter;
     this->mutation_proba =  mutation_proba;
 
-    double p = 1.0;
-
-    std::random_device rd{};
-    std::mt19937 random_engine{rd()};
-    rng = random_engine;
-    std::bernoulli_distribution d(p);
-
-    //creating zero generation with random genes
+    //creating zero generation with some genes
     for(int i = 0; i < population_size; i++) {
-        std::vector<bool> new_chromosome;
-        for(int j = 0; j < chromosome_len; j++) {
-            new_chromosome.push_back(d(rng));
-        }
-        population.push_back(Individual(new_chromosome));
+        population.push_back(Individual());
     };
 }
 
@@ -133,8 +121,6 @@ Genetic::Individual Genetic::GeneticAlgorithm::one_point_crossover(Individual s1
     int length = s1.chromosome.size();
     std::uniform_int_distribution<> d(1, length - 1);
     int point = d(rng);
-
-    //std::cout << "Picked point " << point << std::endl;
 
     for(int i = 0; i < point; i++) {
         new_chromosome.push_back(s1.chromosome[i]);
