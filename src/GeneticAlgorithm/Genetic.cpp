@@ -127,7 +127,22 @@ Genetic::Individual Genetic::GeneticAlgorithm::crossover(Individual& parent1, In
     return Individual(new_genotype);
 }
 
+void Genetic::GeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individual_vector, double mutation_proba, int parameter)
+{
+    std::bernoulli_distribution bernoulli_d(mutation_proba);
+    int genotype_len = individual_vector[0].size();
+    for(int mut_iter = 0; mut_iter < parameter; mut_iter++) {
+        std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
+        for(int j = population_size + 1; j < extended_population_size; j++) {
+            bool mutate = bernoulli_d(rng);
+            if(!mutate)
+                continue;
 
+            int random_gen = genes_d(rng);
+            individual_vector[j].genotype[random_gen] = !individual_vector[j].genotype[random_gen];
+        }
+    }
+}
 
 void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
     std::time_t start = std::time(nullptr);
@@ -155,18 +170,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
 
         //Mutate
         int mutations = (n / 5) * (max_iter - i) / max_iter;
-        for(int mut_iter = 0; mut_iter < mutations; mut_iter++) {
-            std::bernoulli_distribution bernoulli_d(mutation_proba);
-            std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
-            for(int j = population_size + 1; j < extended_population_size; j++) {
-                bool mutate = bernoulli_d(rng);
-                if(!mutate)
-                    continue;
-
-                int random_gen = genes_d(rng);
-                extended_population[j].genotype[random_gen] = !extended_population[j].genotype[random_gen];
-            }
-        }
+        mutate(extended_population, 1.0, mutations);
 
         //Get scores
         std::vector<double> scores;

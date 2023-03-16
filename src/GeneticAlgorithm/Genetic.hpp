@@ -55,6 +55,7 @@ public:
 
     void create_zero_generation(int genotype_len);
     Individual crossover(Individual& parent1, Individual& parent2);
+    void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter);
 
     Individual& get_best_individual();
     void print_individuals();
