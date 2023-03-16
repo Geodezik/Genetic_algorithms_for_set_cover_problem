@@ -55,12 +55,13 @@ public:
                      double mutation_proba, int max_iter = 100, std::string task = "min_bool_coverings_1");
     Individual one_point_crossover(Individual s1, Individual s2);
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
+    void print_stats(std::vector<double>& scores, std::vector<int>& argbest, int iteration, int verbose);
 
     // TO IMPLEMENT
     void create_zero_generation(int genotype_len);
     Individual crossover(Individual& parent1, Individual& parent2);
     void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter);
-    void selection(std::vector<Individual>& extended_population, std::vector<double>& scores);
+    void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose);
 
     Individual& get_best_individual();
     void print_individuals();

@@ -144,10 +144,28 @@ void Genetic::GeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individ
     }
 }
 
-void Genetic::GeneticAlgorithm::selection(std::vector<Genetic::Individual>& extended_population, std::vector<double>& scores)
+void Genetic::GeneticAlgorithm::print_stats(std::vector<double>& scores, std::vector<int>& argbest, int iteration, int verbose)
+{
+    switch(verbose) {
+        case 0:
+            break;
+        case 1:
+            std::cout << scores[argbest[0]] << std::endl;
+            break;
+        case 2:
+            std::cout << "Generation: " << iteration << std::endl;
+            std::cout << "Best individual fitness: " << scores[argbest[0]] << std::endl;
+            std::cout << std::endl;
+            break;
+    }
+}
+
+void Genetic::GeneticAlgorithm::selection(std::vector<Genetic::Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose)
 {
     //Take K best
     std::vector<int> argbest = argsort(scores);
+    print_stats(scores, argbest, iteration, verbose);
+
     std::vector<Individual> best;
 
     // first include non-firstgen that are coverings
@@ -211,21 +229,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         }
 
         //Selection
-        selection(extended_population, scores);
-        /*
-        switch(verbose) {
-            case 0:
-                break;
-            case 1:
-                std::cout << scores[argbest[0]] << std::endl;
-                break;
-            case 2:
-                std::cout << "Generation: " << i << std::endl;
-                std::cout << "Best individual fitness: " << scores[argbest[0]] << std::endl;
-                std::cout << std::endl;
-                break;
-        }
-        */
+        selection(extended_population, scores, i, verbose);
     }
 
     std::time_t finish = std::time(nullptr);
