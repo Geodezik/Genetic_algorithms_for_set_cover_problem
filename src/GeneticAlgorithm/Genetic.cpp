@@ -144,10 +144,44 @@ void Genetic::GeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individ
     }
 }
 
+void Genetic::GeneticAlgorithm::selection(std::vector<Genetic::Individual>& extended_population, std::vector<double>& scores)
+{
+    //Take K best
+    std::vector<int> argbest = argsort(scores);
+    std::vector<Individual> best;
+
+    // first include non-firstgen that are coverings
+    for(int j = 0; j < extended_population_size; j++) {
+        if(best.size() == population_size)
+            break;
+        if(extended_population[argbest[j]].first_gen || (scores[j] > n))
+            continue;
+        best.push_back(extended_population[argbest[j]]);
+    }
+
+    // second include firstgen
+    for(int j = 0; j < extended_population_size; j++) {
+        if(best.size() == population_size)
+            break;
+        if(scores[j] > n)
+            continue;
+        best.push_back(extended_population[argbest[j]]);
+    }
+
+    // third include non-coverings
+    for(int j = 0; j < extended_population_size; j++) {
+        if(best.size() == population_size)
+            break;
+        best.push_back(extended_population[argbest[j]]);
+    }
+
+    population = best;
+}
+
 void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
     std::time_t start = std::time(nullptr);
-    int m = M.get_m();
-    int n = M.get_n();
+    this->m = M.get_m();
+    this->n = M.get_n();
 
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
@@ -155,9 +189,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
     std::uniform_int_distribution<> parents_d(0, population_size - 1);
 
     for(int i = 0; i < max_iter; i++) {
-        //std::cout << population[0].fitness(M) << std::endl;
         std::vector<Individual> extended_population = population;
-        //std::cout << extended_population[0].fitness(M) << std::endl;
         for(int j = 0; j < delta; j++) {
             int p1, p2;
             do {
@@ -176,12 +208,11 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         std::vector<double> scores;
         for(int j = 0; j < extended_population_size; j++) {
             scores.push_back(extended_population[j].fitness(M));
-            //std::cout << scores[j] << " ";
         }
 
-        //Take K best
-        std::vector<int> argbest = argsort(scores);
-
+        //Selection
+        selection(extended_population, scores);
+        /*
         switch(verbose) {
             case 0:
                 break;
@@ -194,35 +225,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
                 std::cout << std::endl;
                 break;
         }
-
-        std::vector<Individual> best;
-
-        // first include non-firstgen that are coverings
-        for(int j = 0; j < extended_population_size; j++) {
-            if(best.size() == population_size)
-                break;
-            if(extended_population[argbest[j]].first_gen || (scores[j] > n))
-                continue;
-            best.push_back(extended_population[argbest[j]]);
-        }
-
-        // second include firstgen
-        for(int j = 0; j < extended_population_size; j++) {
-            if(best.size() == population_size)
-                break;
-            if(scores[j] > n)
-                continue;
-            best.push_back(extended_population[argbest[j]]);
-        }
-
-        // third include non-coverings
-        for(int j = 0; j < extended_population_size; j++) {
-            if(best.size() == population_size)
-                break;
-            best.push_back(extended_population[argbest[j]]);
-        }
-
-        population = best;
+        */
     }
 
     std::time_t finish = std::time(nullptr);
@@ -248,8 +251,6 @@ void Genetic::GeneticAlgorithm::print_individuals()
 
 void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
-    int m = M.get_m();
-    int n = M.get_n();
     if(n > 100) {
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
     }
@@ -269,9 +270,6 @@ void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 
 void Genetic::GeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M)
 {
-    int m = M.get_m();
-    int n = M.get_n();
-
     std::vector<int> scores;
     int genotype_len = population[0].size();
 

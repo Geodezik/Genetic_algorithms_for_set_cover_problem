@@ -42,6 +42,9 @@ class Genetic::GeneticAlgorithm {
     int extended_population_size;
     double mutation_proba;
 
+    int m;
+    int n;
+
     double fit_time;
 
     template <typename T>
@@ -53,9 +56,11 @@ public:
     Individual one_point_crossover(Individual s1, Individual s2);
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
 
+    // TO IMPLEMENT
     void create_zero_generation(int genotype_len);
     Individual crossover(Individual& parent1, Individual& parent2);
     void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter);
+    void selection(std::vector<Individual>& extended_population, std::vector<double>& scores);
 
     Individual& get_best_individual();
     void print_individuals();
