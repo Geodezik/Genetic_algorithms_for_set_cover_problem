@@ -54,6 +54,7 @@ public:
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
 
     void create_zero_generation(int genotype_len);
+    Individual crossover(Individual& parent1, Individual& parent2);
 
     Individual& get_best_individual();
     void print_individuals();

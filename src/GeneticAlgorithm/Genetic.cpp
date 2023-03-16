@@ -107,21 +107,21 @@ void Genetic::GeneticAlgorithm::create_zero_generation(int genotype_len)
     };
 }
 
-Genetic::Individual Genetic::GeneticAlgorithm::one_point_crossover(Individual s1, Individual s2)
+Genetic::Individual Genetic::GeneticAlgorithm::crossover(Individual& parent1, Individual& parent2)
 {
     // pick a random point (but not at the end of a chromosomes), then
     // join two parts from different parents
     std::vector<bool> new_genotype;
-    int length = s1.genotype.size();
+    int length = parent1.genotype.size();
     std::uniform_int_distribution<> d(1, length - 1);
     int point = d(rng);
 
     for(int i = 0; i < point; i++) {
-        new_genotype.push_back(s1.genotype[i]);
+        new_genotype.push_back(parent1.genotype[i]);
     }
 
     for(int i = point; i < length; i++) {
-        new_genotype.push_back(s2.genotype[i]);
+        new_genotype.push_back(parent2.genotype[i]);
     }
 
     return Individual(new_genotype);
@@ -149,7 +149,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
                 p1 = parents_d(rng);
                 p2 = parents_d(rng);
             } while (p1 == p2);
-            Individual child = one_point_crossover(population[p1], population[p2]);
+            Individual child = crossover(population[p1], population[p2]);
             extended_population.push_back(child);
         }
 
