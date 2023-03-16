@@ -18,14 +18,15 @@ namespace Genetic {
 };
 
 class Genetic::Individual {
-    std::vector<bool> genotype;
-    bool first_gen;
-
+    bool zero_gen;
 public:
+    std::vector<bool> genotype;
+
     Individual(std::vector<bool>& genotype, bool first_gen=false, double p=1.0);
 
     int size();
     bool is_coverage(BooleanMatrix::BooleanMatrix& M);
+    bool is_from_zero_gen();
     double fitness(BooleanMatrix::BooleanMatrix& M);
 
     friend Genetic::BaseGeneticAlgorithm;
@@ -33,6 +34,7 @@ public:
 };
 
 class Genetic::BaseGeneticAlgorithm {
+protected:
     std::vector<Individual> population;
     std::vector<int> scores;
 
@@ -52,23 +54,34 @@ class Genetic::BaseGeneticAlgorithm {
     std::vector<int> argsort(const std::vector<T> &v);
 
 public:
-    BaseGeneticAlgorithm(int population_size, int extended_population_size, int genotype_len,
+    BaseGeneticAlgorithm(int population_size, int extended_population_size,
                      double mutation_proba, int max_iter = 100, std::string task = "min_bool_coverings_1");
     Individual one_point_crossover(Individual s1, Individual s2);
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
     void print_stats(std::vector<double>& scores, std::vector<int>& argbest, int iteration, int verbose);
 
     // TO IMPLEMENT
-    void create_zero_generation(int genotype_len);
-    Individual crossover(Individual& parent1, Individual& parent2);
-    void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter);
-    void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose);
+    virtual void create_zero_generation(int genotype_len) = 0;
+    virtual Individual crossover(Individual& parent1, Individual& parent2) = 0;
+    virtual void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter) = 0;
+    virtual void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose) = 0;
 
     Individual& get_best_individual();
     void print_individuals();
     void print_solution(BooleanMatrix::BooleanMatrix& M);
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
     void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename="results.txt");
+};
+
+class Genetic::CoverageGeneticAlgorithm: public Genetic::BaseGeneticAlgorithm {
+public:
+    CoverageGeneticAlgorithm(int population_size, int extended_population_size,
+                     double mutation_proba, int max_iter = 100, std::string task = "min_bool_coverings_1");
+
+    void create_zero_generation(int genotype_len);
+    Individual crossover(Individual& parent1, Individual& parent2);
+    void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter);
+    void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose);
 };
 
 #endif

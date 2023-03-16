@@ -43,7 +43,7 @@ int main()
     }
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100, str task
-    BaseGeneticAlgorithm A = BaseGeneticAlgorithm(15, 75, n, 1.0, 10);
+    CoverageGeneticAlgorithm A = CoverageGeneticAlgorithm(15, 75, 1.0, 10);
     // A.print_individuals();
     A.fit(M, 2, false);
     //A.analyze_solution(M);

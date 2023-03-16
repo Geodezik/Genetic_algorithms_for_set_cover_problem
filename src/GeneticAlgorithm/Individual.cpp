@@ -1,8 +1,8 @@
 #include "Genetic.hpp"
 
-Genetic::Individual::Individual(std::vector<bool>& genotype, bool first_gen, double p)
+Genetic::Individual::Individual(std::vector<bool>& genotype, bool zero_gen, double p)
 {
-    this->first_gen = first_gen;
+    this->zero_gen = zero_gen;
     this->genotype = genotype;
 }
 
@@ -33,12 +33,17 @@ bool Genetic::Individual::is_coverage(BooleanMatrix::BooleanMatrix& M)
     return true;
 }
 
+bool Genetic::Individual::is_from_zero_gen()
+{
+    return zero_gen;
+}
+
 double Genetic::Individual::fitness(BooleanMatrix::BooleanMatrix& M)
 {
     int m = M.get_m();
     int n = M.get_n();
 
-    if(first_gen)
+    if(zero_gen)
         return 0;
 
     for(int i = 0; i < m; i++) {
