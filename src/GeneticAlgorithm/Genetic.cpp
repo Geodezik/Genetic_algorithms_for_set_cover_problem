@@ -1,6 +1,6 @@
 #include "Genetic.hpp"
 
-Genetic::Individual::Individual(std::vector<bool> genotype, bool first_gen, double p)
+Genetic::Individual::Individual(std::vector<bool>& genotype, bool first_gen, double p)
 {
     this->first_gen = first_gen;
     this->genotype = genotype;
@@ -92,9 +92,18 @@ Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_po
     this->max_iter = max_iter;
     this->mutation_proba =  mutation_proba;
 
+    create_zero_generation(genotype_len);
+}
+
+void Genetic::GeneticAlgorithm::create_zero_generation(int genotype_len)
+{
     //creating zero generation with some genes
     for(int i = 0; i < population_size; i++) {
-        population.push_back(Individual(genotype_len, true));
+        std::vector<bool> genotype;
+        for(int j = 0; j < genotype_len; j++) {
+            genotype.push_back(true);
+        }
+        population.push_back(Individual(genotype, true));
     };
 }
 
@@ -221,9 +230,9 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
     }
 }
 
-std::vector<bool> Genetic::GeneticAlgorithm::get_best_individual()
+Genetic::Individual& Genetic::GeneticAlgorithm::get_best_individual()
 {
-    return population[0].genotype;
+    return population[0];
 }
 
 void Genetic::GeneticAlgorithm::print_individuals()
@@ -243,7 +252,7 @@ void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 
     std::cout << "Best individual: " << get_best_individual() << std::endl;
     std::cout << "Coverage: " << std::endl;
-    std::vector<bool> best = get_best_individual();
+    std::vector<bool> best = get_best_individual().genotype;
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < n; j++) {
             if(!best[j])

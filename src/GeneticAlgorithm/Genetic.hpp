@@ -21,7 +21,7 @@ class Genetic::Individual {
     bool first_gen;
 
 public:
-    Individual(std::vector<bool> genotype, bool first_gen=false, double p=1.0);
+    Individual(std::vector<bool>& genotype, bool first_gen=false, double p=1.0);
 
     int size();
     bool is_coverage(BooleanMatrix::BooleanMatrix& M);
@@ -52,7 +52,10 @@ public:
                      double mutation_proba, int max_iter = 100, std::string task = "min_bool_coverings_1");
     Individual one_point_crossover(Individual s1, Individual s2);
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
-    std::vector<bool> get_best_individual();
+
+    void create_zero_generation(int genotype_len);
+
+    Individual& get_best_individual();
     void print_individuals();
     void print_solution(BooleanMatrix::BooleanMatrix& M);
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
