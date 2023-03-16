@@ -8,15 +8,15 @@ using namespace Genetic;
 
 int main()
 {
-    int m = 7500;
-    int n = 7500;
+    int m = 2500;
+    int n = 2500;
 
-    double p = 0.001;
+    double p = 10.0 / n; //means!
     std::random_device rd{};
     std::mt19937 rng{rd()};
     rng.seed(317);
     std::bernoulli_distribution bd(p);
-    std::uniform_int_distribution<> uid(2, 2163);
+    std::uniform_int_distribution<> uid(1, n - 1);
 
     /*
     bool Matrix[m][n] = {
@@ -39,15 +39,15 @@ int main()
             M[i][j] = static_cast<bool> (bd(rng));
             //M[i][j] = Matrix[i][j];
         }
-        M[i][uid(rng)] = true;
+        //M[i][uid(rng)] = true;
     }
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100, str task
-    GeneticAlgorithm A = GeneticAlgorithm(5, 10, n, 1.0, 1);
+    GeneticAlgorithm A = GeneticAlgorithm(15, 75, n, 1.0, 10);
     // A.print_individuals();
     A.fit(M, 2, false);
-    A.analyze_solution(M);
-    A.print_fit_stats(M);
+    //A.analyze_solution(M);
+    //A.print_fit_stats(M);
 
     return 0;
 }

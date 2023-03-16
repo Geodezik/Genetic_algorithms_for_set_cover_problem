@@ -21,7 +21,6 @@ class Genetic::Individual {
     bool first_gen;
 
 public:
-    Individual(int size, bool first_gen=false, double p=1.0);
     Individual(std::vector<bool> genotype, bool first_gen=false, double p=1.0);
 
     int size();

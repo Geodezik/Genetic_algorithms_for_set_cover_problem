@@ -1,0 +1,4 @@
+\babel@toc {russian}{}
+\beamer@sectionintoc {1}{Обзор статей про частичные порядки}{3}{0}{1}
+\beamer@subsectionintoc {1}{1}{Общая постановка задачи}{3}{0}{1}
+\beamer@subsectionintoc {1}{2}{Алгоритм классификации и процедуры упорядочения}{4}{0}{1}

@@ -1,20 +1,5 @@
 #include "Genetic.hpp"
 
-Genetic::Individual::Individual(int genotype_size, bool first_gen, double p)
-{
-    this->first_gen = first_gen;
-
-    std::random_device rd{};
-    std::mt19937 rng{rd()};
-    std::bernoulli_distribution d(p);
-
-    //creating chromosomes from random bits
-    genotype = std::vector<bool>();
-    for(int i=0; i < genotype_size; i++) {
-        genotype.push_back(d(rng));
-    }
-}
-
 Genetic::Individual::Individual(std::vector<bool> genotype, bool first_gen, double p)
 {
     this->first_gen = first_gen;
@@ -109,7 +94,7 @@ Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_po
 
     //creating zero generation with some genes
     for(int i = 0; i < population_size; i++) {
-        population.push_back(Individual(genotype_len));
+        population.push_back(Individual(genotype_len, true));
     };
 }
 
@@ -133,6 +118,8 @@ Genetic::Individual Genetic::GeneticAlgorithm::one_point_crossover(Individual s1
     return Individual(new_genotype);
 }
 
+
+
 void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
     std::time_t start = std::time(nullptr);
     int m = M.get_m();
@@ -144,7 +131,9 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
     std::uniform_int_distribution<> parents_d(0, population_size - 1);
 
     for(int i = 0; i < max_iter; i++) {
+        //std::cout << population[0].fitness(M) << std::endl;
         std::vector<Individual> extended_population = population;
+        //std::cout << extended_population[0].fitness(M) << std::endl;
         for(int j = 0; j < delta; j++) {
             int p1, p2;
             do {
@@ -156,9 +145,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         }
 
         //Mutate
-        int mutations = 1000 - i * 250;
-        if(mutations < 50)
-            mutations = 50;
+        int mutations = (n / 5) * (max_iter - i) / max_iter;
         for(int mut_iter = 0; mut_iter < mutations; mut_iter++) {
             std::bernoulli_distribution bernoulli_d(mutation_proba);
             std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
@@ -176,6 +163,7 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
         std::vector<double> scores;
         for(int j = 0; j < extended_population_size; j++) {
             scores.push_back(extended_population[j].fitness(M));
+            //std::cout << scores[j] << " ";
         }
 
         //Take K best

@@ -1,0 +1,3 @@
+\babel@toc {russian}{}
+\beamer@sectionintoc {1}{Описание алгоритма}{3}{0}{1}
+\beamer@sectionintoc {2}{Сравнения и результаты}{5}{0}{2}
