@@ -12,7 +12,8 @@
 
 namespace Genetic {
     class Individual;
-    class GeneticAlgorithm;
+    class BaseGeneticAlgorithm;
+    class CoverageGeneticAlgorithm;
     std::ostream& operator<<(std::ostream& os, const Individual& I);
 };
 
@@ -27,11 +28,11 @@ public:
     bool is_coverage(BooleanMatrix::BooleanMatrix& M);
     double fitness(BooleanMatrix::BooleanMatrix& M);
 
-    friend Genetic::GeneticAlgorithm;
+    friend Genetic::BaseGeneticAlgorithm;
     friend std::ostream& Genetic::operator<<(std::ostream& os, const Genetic::Individual& I);
 };
 
-class Genetic::GeneticAlgorithm {
+class Genetic::BaseGeneticAlgorithm {
     std::vector<Individual> population;
     std::vector<int> scores;
 
@@ -51,7 +52,7 @@ class Genetic::GeneticAlgorithm {
     std::vector<int> argsort(const std::vector<T> &v);
 
 public:
-    GeneticAlgorithm(int population_size, int extended_population_size, int genotype_len,
+    BaseGeneticAlgorithm(int population_size, int extended_population_size, int genotype_len,
                      double mutation_proba, int max_iter = 100, std::string task = "min_bool_coverings_1");
     Individual one_point_crossover(Individual s1, Individual s2);
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);

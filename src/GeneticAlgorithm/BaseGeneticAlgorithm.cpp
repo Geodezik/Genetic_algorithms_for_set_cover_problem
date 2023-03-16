@@ -1,7 +1,7 @@
 #include "Genetic.hpp"
 
 template <typename T>
-std::vector<int> Genetic::GeneticAlgorithm::argsort(const std::vector<T> &v) {
+std::vector<int> Genetic::BaseGeneticAlgorithm::argsort(const std::vector<T> &v) {
     //Argsort for any type of elem-comparable vectors
     std::vector<int> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
@@ -12,7 +12,7 @@ std::vector<int> Genetic::GeneticAlgorithm::argsort(const std::vector<T> &v) {
     return idx;
 }
 
-Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_population_size, int genotype_len,
+Genetic::BaseGeneticAlgorithm::BaseGeneticAlgorithm(int population_size, int extended_population_size, int genotype_len,
                     double mutation_proba, int max_iter, std::string task)
 {
     this->population_size = population_size;
@@ -23,7 +23,7 @@ Genetic::GeneticAlgorithm::GeneticAlgorithm(int population_size, int extended_po
     create_zero_generation(genotype_len);
 }
 
-void Genetic::GeneticAlgorithm::create_zero_generation(int genotype_len)
+void Genetic::BaseGeneticAlgorithm::create_zero_generation(int genotype_len)
 {
     //creating zero generation with some genes
     for(int i = 0; i < population_size; i++) {
@@ -35,7 +35,7 @@ void Genetic::GeneticAlgorithm::create_zero_generation(int genotype_len)
     };
 }
 
-Genetic::Individual Genetic::GeneticAlgorithm::crossover(Individual& parent1, Individual& parent2)
+Genetic::Individual Genetic::BaseGeneticAlgorithm::crossover(Individual& parent1, Individual& parent2)
 {
     // pick a random point (but not at the end of a chromosomes), then
     // join two parts from different parents
@@ -55,7 +55,7 @@ Genetic::Individual Genetic::GeneticAlgorithm::crossover(Individual& parent1, In
     return Individual(new_genotype);
 }
 
-void Genetic::GeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individual_vector, double mutation_proba, int parameter)
+void Genetic::BaseGeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individual_vector, double mutation_proba, int parameter)
 {
     std::bernoulli_distribution bernoulli_d(mutation_proba);
     int genotype_len = individual_vector[0].size();
@@ -72,7 +72,7 @@ void Genetic::GeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individ
     }
 }
 
-void Genetic::GeneticAlgorithm::print_stats(std::vector<double>& scores, std::vector<int>& argbest, int iteration, int verbose)
+void Genetic::BaseGeneticAlgorithm::print_stats(std::vector<double>& scores, std::vector<int>& argbest, int iteration, int verbose)
 {
     switch(verbose) {
         case 0:
@@ -88,7 +88,7 @@ void Genetic::GeneticAlgorithm::print_stats(std::vector<double>& scores, std::ve
     }
 }
 
-void Genetic::GeneticAlgorithm::selection(std::vector<Genetic::Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose)
+void Genetic::BaseGeneticAlgorithm::selection(std::vector<Genetic::Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose)
 {
     //Take K best
     std::vector<int> argbest = argsort(scores);
@@ -124,7 +124,7 @@ void Genetic::GeneticAlgorithm::selection(std::vector<Genetic::Individual>& exte
     population = best;
 }
 
-void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
+void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
     std::time_t start = std::time(nullptr);
     this->m = M.get_m();
     this->n = M.get_n();
@@ -169,19 +169,19 @@ void Genetic::GeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose
     }
 }
 
-Genetic::Individual& Genetic::GeneticAlgorithm::get_best_individual()
+Genetic::Individual& Genetic::BaseGeneticAlgorithm::get_best_individual()
 {
     return population[0];
 }
 
-void Genetic::GeneticAlgorithm::print_individuals()
+void Genetic::BaseGeneticAlgorithm::print_individuals()
 {
     for(int i =0; i < population_size; i++) {
         std::cout << population[i] << std::endl;
     }
 }
 
-void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
+void Genetic::BaseGeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
     if(n > 100) {
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
@@ -200,7 +200,7 @@ void Genetic::GeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
     }
 }
 
-void Genetic::GeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M)
+void Genetic::BaseGeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M)
 {
     std::vector<int> scores;
     int genotype_len = population[0].size();
@@ -218,7 +218,7 @@ void Genetic::GeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M
     }
 }
 
-void Genetic::GeneticAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
+void Genetic::BaseGeneticAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
 {
   std::ofstream f;
   f.open(filename, std::ofstream::app);

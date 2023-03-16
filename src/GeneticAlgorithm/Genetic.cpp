@@ -1,4 +1,5 @@
 #include "Genetic.hpp"
 
 #include "Individual.cpp"
-#include "GeneticAlgorithm.cpp"
+#include "BaseGeneticAlgorithm.cpp"
+#include "CoverageGeneticAlgorithm.cpp"
