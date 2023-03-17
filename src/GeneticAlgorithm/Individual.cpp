@@ -1,6 +1,6 @@
 #include "Genetic.hpp"
 
-Genetic::Individual::Individual(std::vector<bool>& genotype, bool zero_gen, double p)
+Genetic::Individual::Individual(std::vector<bool>& genotype, double p, bool zero_gen)
 {
     this->zero_gen = zero_gen;
     this->genotype = genotype;
