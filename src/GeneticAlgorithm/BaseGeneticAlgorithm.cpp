@@ -50,7 +50,7 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
     std::uniform_int_distribution<> parents_d(0, population_size - 1);
 
     for(int i = 0; i < max_iter; i++) {
-        std::vector<BaseIndividual> extended_population = population;
+        std::vector<Individual> extended_population = population;
         for(int j = 0; j < delta; j++) {
             int p1, p2;
             do {
@@ -84,7 +84,7 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
     }
 }
 
-Genetic::BaseIndividual& Genetic::BaseGeneticAlgorithm::get_best_individual()
+Genetic::Individual& Genetic::BaseGeneticAlgorithm::get_best_individual()
 {
     return population[0];
 }

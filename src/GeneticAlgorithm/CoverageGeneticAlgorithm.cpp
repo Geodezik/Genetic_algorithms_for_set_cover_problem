@@ -12,11 +12,11 @@ void Genetic::CoverageGeneticAlgorithm::create_zero_generation(int genotype_len)
         for(int j = 0; j < genotype_len; j++) {
             genotype.push_back(true);
         }
-        population.push_back(BaseIndividual(genotype, true));
+        population.push_back(Individual(genotype, true));
     };
 }
 
-Genetic::BaseIndividual Genetic::CoverageGeneticAlgorithm::crossover(BaseIndividual& parent1, BaseIndividual& parent2)
+Genetic::Individual Genetic::CoverageGeneticAlgorithm::crossover(Individual& parent1, Individual& parent2)
 {
     // pick a random point (but not at the end of a chromosomes), then
     // join two parts from different parents
@@ -33,10 +33,10 @@ Genetic::BaseIndividual Genetic::CoverageGeneticAlgorithm::crossover(BaseIndivid
         new_genotype.push_back(parent2.genotype[i]);
     }
 
-    return CoverageIndividual(new_genotype);
+    return Individual(new_genotype);
 }
 
-void Genetic::CoverageGeneticAlgorithm::mutate(std::vector<Genetic::BaseIndividual>& individual_vector, double mutation_proba, int parameter)
+void Genetic::CoverageGeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individual_vector, double mutation_proba, int parameter)
 {
     std::bernoulli_distribution bernoulli_d(mutation_proba);
     int genotype_len = individual_vector[0].size();
@@ -53,13 +53,13 @@ void Genetic::CoverageGeneticAlgorithm::mutate(std::vector<Genetic::BaseIndividu
     }
 }
 
-void Genetic::CoverageGeneticAlgorithm::selection(std::vector<Genetic::BaseIndividual>& extended_population, std::vector<double>& scores, int iteration, int verbose)
+void Genetic::CoverageGeneticAlgorithm::selection(std::vector<Genetic::Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose)
 {
     //Take K best
     std::vector<int> argbest = argsort(scores);
     print_stats(scores, argbest, iteration, verbose);
 
-    std::vector<BaseIndividual> best;
+    std::vector<Individual> best;
 
     // first include non-firstgen that are coverings
     for(int j = 0; j < extended_population_size; j++) {
