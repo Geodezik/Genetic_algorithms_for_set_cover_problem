@@ -11,18 +11,20 @@
 #include "BooleanMatrix.hpp"
 
 namespace Genetic {
-    class Individual;
     class BaseGeneticAlgorithm;
     class CoverageGeneticAlgorithm;
-    std::ostream& operator<<(std::ostream& os, const Individual& I);
+
+    class BaseIndividual;
+    class CoverageIndividual;
+    std::ostream& operator<<(std::ostream& os, const BaseIndividual& I);
 };
 
-class Genetic::Individual {
+class Genetic::BaseIndividual {
     bool zero_gen;
 public:
     std::vector<bool> genotype;
 
-    Individual(std::vector<bool>& genotype, bool first_gen=false, double p=1.0);
+    BaseIndividual(std::vector<bool>& genotype, bool first_gen=false, double p=1.0);
 
     int size();
     bool is_coverage(BooleanMatrix::BooleanMatrix& M);
@@ -30,12 +32,17 @@ public:
     double fitness(BooleanMatrix::BooleanMatrix& M);
 
     friend Genetic::BaseGeneticAlgorithm;
-    friend std::ostream& Genetic::operator<<(std::ostream& os, const Genetic::Individual& I);
+    friend std::ostream& Genetic::operator<<(std::ostream& os, const Genetic::BaseIndividual& I);
+};
+
+class Genetic::CoverageIndividual: public BaseIndividual {
+public:
+    CoverageIndividual(std::vector<bool>& genotype, bool first_gen=false, double p=1.0);
 };
 
 class Genetic::BaseGeneticAlgorithm {
 protected:
-    std::vector<Individual> population;
+    std::vector<BaseIndividual> population;
     std::vector<int> scores;
 
     std::mt19937 rng;
@@ -56,17 +63,17 @@ protected:
 public:
     BaseGeneticAlgorithm(int population_size, int extended_population_size,
                      double mutation_proba, int max_iter = 100, std::string task = "min_bool_coverings_1");
-    Individual one_point_crossover(Individual s1, Individual s2);
+    BaseIndividual one_point_crossover(BaseIndividual s1, BaseIndividual s2);
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
     void print_stats(std::vector<double>& scores, std::vector<int>& argbest, int iteration, int verbose);
 
     // TO IMPLEMENT
     virtual void create_zero_generation(int genotype_len) = 0;
-    virtual Individual crossover(Individual& parent1, Individual& parent2) = 0;
-    virtual void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter) = 0;
-    virtual void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose) = 0;
+    virtual BaseIndividual crossover(BaseIndividual& parent1, BaseIndividual& parent2) = 0;
+    virtual void mutate(std::vector<BaseIndividual>& individual_vector, double mutation_proba, int parameter) = 0;
+    virtual void selection(std::vector<BaseIndividual>& extended_population, std::vector<double>& scores, int iteration, int verbose) = 0;
 
-    Individual& get_best_individual();
+    BaseIndividual& get_best_individual();
     void print_individuals();
     void print_solution(BooleanMatrix::BooleanMatrix& M);
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
@@ -79,9 +86,9 @@ public:
                      double mutation_proba, int max_iter = 100, std::string task = "min_bool_coverings_1");
 
     void create_zero_generation(int genotype_len);
-    Individual crossover(Individual& parent1, Individual& parent2);
-    void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter);
-    void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose);
+    BaseIndividual crossover(BaseIndividual& parent1, BaseIndividual& parent2);
+    void mutate(std::vector<BaseIndividual>& individual_vector, double mutation_proba, int parameter);
+    void selection(std::vector<BaseIndividual>& extended_population, std::vector<double>& scores, int iteration, int verbose);
 };
 
 #endif

@@ -1,17 +1,17 @@
 #include "Genetic.hpp"
 
-Genetic::Individual::Individual(std::vector<bool>& genotype, bool zero_gen, double p)
+Genetic::BaseIndividual::BaseIndividual(std::vector<bool>& genotype, bool zero_gen, double p)
 {
     this->zero_gen = zero_gen;
     this->genotype = genotype;
 }
 
-int Genetic::Individual::size()
+int Genetic::BaseIndividual::size()
 {
     return genotype.size();
 }
 
-bool Genetic::Individual::is_coverage(BooleanMatrix::BooleanMatrix& M)
+bool Genetic::BaseIndividual::is_coverage(BooleanMatrix::BooleanMatrix& M)
 {
     int m = M.get_m();
     int n = M.get_n();
@@ -33,12 +33,12 @@ bool Genetic::Individual::is_coverage(BooleanMatrix::BooleanMatrix& M)
     return true;
 }
 
-bool Genetic::Individual::is_from_zero_gen()
+bool Genetic::BaseIndividual::is_from_zero_gen()
 {
     return zero_gen;
 }
 
-double Genetic::Individual::fitness(BooleanMatrix::BooleanMatrix& M)
+double Genetic::BaseIndividual::fitness(BooleanMatrix::BooleanMatrix& M)
 {
     int m = M.get_m();
     int n = M.get_n();
@@ -69,10 +69,12 @@ double Genetic::Individual::fitness(BooleanMatrix::BooleanMatrix& M)
     return ones_counter;
 }
 
-std::ostream& Genetic::operator<<(std::ostream& os, const Individual& I)
+std::ostream& Genetic::operator<<(std::ostream& os, const BaseIndividual& I)
 {
     for(int i = 0; i < I.genotype.size(); i++) {
         os << I.genotype[i] << " ";
     }
     return os;
 };
+
+Genetic::CoverageIndividual::CoverageIndividual(std::vector<bool>& genotype, bool first_gen, double p): BaseIndividual(genotype, first_gen, p) {}
