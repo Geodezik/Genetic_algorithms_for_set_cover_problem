@@ -12,7 +12,7 @@ void Genetic::CoverageGeneticAlgorithm::create_zero_generation(int genotype_len)
         for(int j = 0; j < genotype_len; j++) {
             genotype.push_back(true);
         }
-        population.push_back(Individual(genotype, 1.0, true));
+        population.push_back(Individual(genotype, true));
     };
 }
 
@@ -33,7 +33,7 @@ Genetic::Individual Genetic::CoverageGeneticAlgorithm::crossover(Individual& par
         new_genotype.push_back(parent2.genotype[i]);
     }
 
-    return Individual(new_genotype, 1.0);
+    return Individual(new_genotype);
 }
 
 void Genetic::CoverageGeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individual_vector, double mutation_proba, int parameter)

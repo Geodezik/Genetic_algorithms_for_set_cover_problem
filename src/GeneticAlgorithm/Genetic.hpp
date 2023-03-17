@@ -23,7 +23,7 @@ class Genetic::Individual {
 public:
     std::vector<bool> genotype;
 
-    Individual(std::vector<bool>& genotype, double p, bool zero_gen=false);
+    Individual(std::vector<bool>& genotype, bool zero_gen=false);
 
     int size();
     bool is_coverage(BooleanMatrix::BooleanMatrix& M);
