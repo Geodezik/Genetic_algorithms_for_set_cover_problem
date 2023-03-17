@@ -19,7 +19,6 @@ namespace Genetic {
 };
 
 class Genetic::Individual {
-protected:
     bool zero_gen;
 public:
     std::vector<bool> genotype;
@@ -29,7 +28,6 @@ public:
     int size();
     bool is_coverage(BooleanMatrix::BooleanMatrix& M);
     bool is_from_zero_gen();
-    double fitness(BooleanMatrix::BooleanMatrix& M);
 
     friend Genetic::BaseGeneticAlgorithm;
     friend std::ostream& Genetic::operator<<(std::ostream& os, const Genetic::Individual& I);
@@ -65,6 +63,7 @@ public:
     virtual void create_zero_generation(int genotype_len) = 0;
     virtual Individual crossover(Individual& parent1, Individual& parent2) = 0;
     virtual void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter) = 0;
+    virtual double fitness(Individual& individual, BooleanMatrix::BooleanMatrix& M) = 0;
     virtual void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose) = 0;
 
     Individual& get_best_individual();
@@ -82,6 +81,7 @@ public:
     void create_zero_generation(int genotype_len);
     Individual crossover(Individual& parent1, Individual& parent2);
     void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter);
+    double fitness(Individual& individual, BooleanMatrix::BooleanMatrix& M);
     void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose);
 };
 

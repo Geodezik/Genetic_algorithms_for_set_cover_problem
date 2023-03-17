@@ -53,6 +53,34 @@ void Genetic::CoverageGeneticAlgorithm::mutate(std::vector<Genetic::Individual>&
     }
 }
 
+double Genetic::CoverageGeneticAlgorithm::fitness(Genetic::Individual& individual, BooleanMatrix::BooleanMatrix& M)
+{
+    if(individual.is_from_zero_gen())
+        return 0;
+
+    for(int i = 0; i < m; i++) {
+        bool flag = false;
+        for(int j = 0; j < n; j++) {
+            // gene in set and elem in M is 1
+            if(individual.genotype[j] && M[i][j]) {
+                flag = true;
+                break;
+            }
+        }
+        if(!flag)
+            return n + 1;
+    }
+
+    // cheap???
+    int ones_counter = 0;
+    for(int i = 0; i < individual.size(); i++) {
+        if(individual.genotype[i])
+            ones_counter++;
+    }
+
+    return ones_counter;
+}
+
 void Genetic::CoverageGeneticAlgorithm::selection(std::vector<Genetic::Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose)
 {
     //Take K best

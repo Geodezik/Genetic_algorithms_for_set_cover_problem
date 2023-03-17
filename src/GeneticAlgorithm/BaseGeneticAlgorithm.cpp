@@ -68,7 +68,7 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
         //Get scores
         std::vector<double> scores;
         for(int j = 0; j < extended_population_size; j++) {
-            scores.push_back(extended_population[j].fitness(M));
+            scores.push_back(fitness(extended_population[j], M));
         }
 
         //Selection
@@ -122,11 +122,11 @@ void Genetic::BaseGeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatri
 
     std::cout << "Analyzing..." << std::endl;
     for(int j = 0; j < population_size; j++) {
-        int fitness = population[j].fitness(M);
+        int f = fitness(population[j], M);
         std::cout << j + 1 << ") ";
-        std::cout << "Fitness: " << fitness << ',';
-        if(fitness < n + 1) {
-            std::cout << " columns not included: " << n - fitness << std::endl;
+        std::cout << "Fitness: " << f << ',';
+        if(f < n + 1) {
+            std::cout << " columns not included: " << n - f << std::endl;
         } else {
             std::cout << " not a covering" << std::endl;
         }
@@ -137,6 +137,6 @@ void Genetic::BaseGeneticAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix
 {
   std::ofstream f;
   f.open(filename, std::ofstream::app);
-  f << fit_time << " " << population[0].fitness(M) << '\n';
+  f << fit_time << " " << fitness(population[0], M) << '\n';
   f.close();
 }

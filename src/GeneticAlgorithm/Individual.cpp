@@ -33,37 +33,6 @@ bool Genetic::Individual::is_coverage(BooleanMatrix::BooleanMatrix& M)
     return true;
 }
 
-double Genetic::Individual::fitness(BooleanMatrix::BooleanMatrix& M)
-{
-    int m = M.get_m();
-    int n = M.get_n();
-
-    if(zero_gen)
-        return 0;
-
-    for(int i = 0; i < m; i++) {
-        bool flag = false;
-        for(int j = 0; j < n; j++) {
-            // gene in set and elem in M is 1
-            if(genotype[j] && M[i][j]) {
-                flag = true;
-                break;
-            }
-        }
-        if(!flag)
-            return n + 1;
-    }
-
-    // cheap???
-    int ones_counter = 0;
-    for(int i = 0; i < size(); i++) {
-        if(genotype[i])
-            ones_counter++;
-    }
-
-    return ones_counter;
-}
-
 bool Genetic::Individual::is_from_zero_gen()
 {
     return zero_gen;
