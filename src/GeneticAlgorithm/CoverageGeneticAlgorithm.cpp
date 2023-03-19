@@ -36,10 +36,10 @@ Genetic::Individual Genetic::CoverageGeneticAlgorithm::crossover(Individual& par
     return Individual(new_genotype);
 }
 
-void Genetic::CoverageGeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individual_vector, double mutation_proba, int parameter)
+void Genetic::CoverageGeneticAlgorithm::mutate(double mutation_proba, int parameter)
 {
     std::bernoulli_distribution bernoulli_d(mutation_proba);
-    int genotype_len = individual_vector[0].size();
+    int genotype_len = population[0].size();
     for(int mut_iter = 0; mut_iter < parameter; mut_iter++) {
         std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
         for(int j = population_size + 1; j < extended_population_size; j++) {
@@ -48,7 +48,7 @@ void Genetic::CoverageGeneticAlgorithm::mutate(std::vector<Genetic::Individual>&
                 continue;
 
             int random_gen = genes_d(rng);
-            individual_vector[j].genotype[random_gen] = !individual_vector[j].genotype[random_gen];
+            population[j].genotype[random_gen] = !population[j].genotype[random_gen];
         }
     }
 }
@@ -56,7 +56,7 @@ void Genetic::CoverageGeneticAlgorithm::mutate(std::vector<Genetic::Individual>&
 double Genetic::CoverageGeneticAlgorithm::fitness(Genetic::Individual& individual, BooleanMatrix::BooleanMatrix& M)
 {
     if(individual.is_from_zero_gen())
-        return 0;
+        return n;
 
     if(!M.is_covered_by(individual.genotype))
         return n + 1;
@@ -71,37 +71,21 @@ double Genetic::CoverageGeneticAlgorithm::fitness(Genetic::Individual& individua
     return ones_counter;
 }
 
-void Genetic::CoverageGeneticAlgorithm::selection(std::vector<Genetic::Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose)
+void Genetic::CoverageGeneticAlgorithm::selection(int iteration, int verbose)
 {
-    //Take K best
+    //Take best
+    std::vector<int> scores_copy = scores;
     std::vector<int> argbest = argsort(scores);
-    print_stats(scores, argbest, iteration, verbose);
-
+    print_stats(argbest, iteration, verbose);
     std::vector<Individual> best;
 
-    // first include non-firstgen that are coverings
-    for(int j = 0; j < extended_population_size; j++) {
-        if(best.size() == population_size)
-            break;
-        if(extended_population[argbest[j]].is_from_zero_gen() || (scores[j] > n))
-            continue;
-        best.push_back(extended_population[argbest[j]]);
-    }
-
-    // second include firstgen
+    // include coverings only
     for(int j = 0; j < extended_population_size; j++) {
         if(best.size() == population_size)
             break;
         if(scores[j] > n)
             continue;
-        best.push_back(extended_population[argbest[j]]);
-    }
-
-    // third include non-coverings
-    for(int j = 0; j < extended_population_size; j++) {
-        if(best.size() == population_size)
-            break;
-        best.push_back(extended_population[argbest[j]]);
+        best.push_back(population[argbest[j]]);
     }
 
     population = best;

@@ -15,7 +15,7 @@ Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& par
     return Individual(new_genotype);
 }
 
-void Genetic::SotnezovGeneticAlgorithm::mutate(std::vector<Genetic::Individual>& individual_vector, double mutation_proba, int parameter)
+void Genetic::SotnezovGeneticAlgorithm::mutate(double mutation_proba, int parameter)
 {
 
 }
@@ -25,7 +25,7 @@ double Genetic::SotnezovGeneticAlgorithm::fitness(Genetic::Individual& individua
     return 0.0;
 }
 
-void Genetic::SotnezovGeneticAlgorithm::selection(std::vector<Genetic::Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose)
+void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
 {
 
 }
