@@ -8,10 +8,10 @@ using namespace Genetic;
 
 int main()
 {
-    int m = 2500;
-    int n = 2500;
+    int m = 10000;
+    int n = 12500;
 
-    double p = 10.0 / n; //means!
+    double p = 0.001; //means!
     std::random_device rd{};
     std::mt19937 rng{rd()};
     rng.seed(317);

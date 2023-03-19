@@ -2,6 +2,7 @@
 #define BOOLEANMATRIX_H
 
 #include <iostream>
+#include <vector>
 
 namespace BooleanMatrix {
     class BooleanMatrix;
@@ -16,6 +17,7 @@ public:
     BooleanMatrix(const BooleanMatrix& B);
     int get_m();
     int get_n();
+    bool is_covered_by(std::vector<bool>& columns);
     bool* operator[](int);
     ~BooleanMatrix();
 

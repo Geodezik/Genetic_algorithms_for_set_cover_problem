@@ -30,6 +30,24 @@ int BooleanMatrix::BooleanMatrix::get_n() {
     return n;
 }
 
+bool BooleanMatrix::BooleanMatrix::is_covered_by(std::vector<bool>& columns)
+{
+    for(int i = 0; i < m; i++) {
+        bool flag = false;
+        for(int j = 0; j < n; j++) {
+            // gene in set and elem in M is 1
+            if(columns[j] && M[i][j]) {
+                flag = true;
+                break;
+            }
+        }
+        if(!flag)
+            return false;
+    }
+
+    return true;
+}
+
 BooleanMatrix::BooleanMatrix::~BooleanMatrix() {
     for (int i = 0; i < m; i++)
         delete M[i];

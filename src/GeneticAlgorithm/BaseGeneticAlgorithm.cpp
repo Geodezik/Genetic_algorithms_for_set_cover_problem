@@ -13,7 +13,7 @@ std::vector<int> Genetic::BaseGeneticAlgorithm::argsort(const std::vector<T> &v)
 }
 
 Genetic::BaseGeneticAlgorithm::BaseGeneticAlgorithm(int population_size, int extended_population_size,
-                    double mutation_proba, int max_iter, std::string task)
+                                                    double mutation_proba, int max_iter)
 {
     this->population_size = population_size;
     this->extended_population_size = extended_population_size;

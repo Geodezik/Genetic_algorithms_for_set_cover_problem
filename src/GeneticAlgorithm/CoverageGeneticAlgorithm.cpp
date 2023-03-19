@@ -1,8 +1,8 @@
 #include "Genetic.hpp"
 
-Genetic::CoverageGeneticAlgorithm::CoverageGeneticAlgorithm(int population_size, int extended_population_size,
-                double mutation_proba, int max_iter, std::string task): Genetic::BaseGeneticAlgorithm(population_size, extended_population_size,
-                                                                        mutation_proba, max_iter, task) {}
+Genetic::CoverageGeneticAlgorithm::CoverageGeneticAlgorithm(int population_size, int extended_population_size, double mutation_proba,
+                                                            int max_iter): Genetic::BaseGeneticAlgorithm(population_size, extended_population_size,
+                                                                                                         mutation_proba, max_iter) {}
 
 void Genetic::CoverageGeneticAlgorithm::create_zero_generation(int genotype_len)
 {
@@ -58,18 +58,8 @@ double Genetic::CoverageGeneticAlgorithm::fitness(Genetic::Individual& individua
     if(individual.is_from_zero_gen())
         return 0;
 
-    for(int i = 0; i < m; i++) {
-        bool flag = false;
-        for(int j = 0; j < n; j++) {
-            // gene in set and elem in M is 1
-            if(individual.genotype[j] && M[i][j]) {
-                flag = true;
-                break;
-            }
-        }
-        if(!flag)
-            return n + 1;
-    }
+    if(!M.is_covered_by(individual.genotype))
+        return n + 1;
 
     // cheap???
     int ones_counter = 0;
