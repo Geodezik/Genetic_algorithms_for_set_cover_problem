@@ -64,7 +64,7 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
         mutate(mutation_proba, mutations);
 
         //Get scores
-        if(i > -1) {
+        if(i == 0) {
             scores.clear();
             for(int j = 0; j < extended_population_size; j++) {
                 scores.push_back(fitness(population[j], M));
