@@ -13,6 +13,7 @@
 namespace Genetic {
     class BaseGeneticAlgorithm;
     class CoverageGeneticAlgorithm;
+    class SotnezovGeneticAlgorithm;
 
     class Individual;
     std::ostream& operator<<(std::ostream& os, const Individual& I);
@@ -82,6 +83,15 @@ public:
     void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose);
 };
 
-//TODO: Sotnezov genetic algorithm
+class Genetic::SotnezovGeneticAlgorithm: public Genetic::BaseGeneticAlgorithm {
+public:
+    SotnezovGeneticAlgorithm(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100);
+
+    void create_zero_generation(int genotype_len);
+    Individual crossover(Individual& parent1, Individual& parent2);
+    void mutate(std::vector<Individual>& individual_vector, double mutation_proba, int parameter);
+    double fitness(Individual& individual, BooleanMatrix::BooleanMatrix& M);
+    void selection(std::vector<Individual>& extended_population, std::vector<double>& scores, int iteration, int verbose);
+};
 
 #endif
