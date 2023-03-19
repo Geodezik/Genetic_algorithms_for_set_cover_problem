@@ -67,11 +67,11 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
         if(i == 0) {
             scores.clear();
             for(int j = 0; j < extended_population_size; j++) {
-                scores.push_back(fitness(population[j], M));
+                scores.push_back(fitness(population[j]));
             }
         } else {
             for(int j = population_size; j < extended_population_size; j++) {
-                scores[j] = fitness(population[j], M);
+                scores[j] = fitness(population[j]);
             }
         }
 
@@ -100,7 +100,7 @@ void Genetic::BaseGeneticAlgorithm::print_individuals()
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
+void Genetic::BaseGeneticAlgorithm::print_solution()
 {
     if(n > 100) {
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
@@ -119,14 +119,14 @@ void Genetic::BaseGeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix&
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M)
+void Genetic::BaseGeneticAlgorithm::analyze_solution()
 {
     std::vector<int> scores;
     int genotype_len = population[0].size();
 
     std::cout << "Analyzing..." << std::endl;
     for(int j = 0; j < population.size(); j++) {
-        int f = fitness(population[j], M);
+        int f = fitness(population[j]);
         std::cout << j + 1 << ") ";
         std::cout << "Fitness: " << f << ',';
         if(f < n + 1) {
@@ -137,10 +137,10 @@ void Genetic::BaseGeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatri
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
+void Genetic::BaseGeneticAlgorithm::print_fit_stats(std::string filename)
 {
   std::ofstream f;
   f.open(filename, std::ofstream::app);
-  f << fit_time << " " << fitness(population[0], M) << '\n';
+  f << fit_time << " " << fitness(population[0]) << '\n';
   f.close();
 }

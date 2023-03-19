@@ -53,7 +53,7 @@ void Genetic::CoverageGeneticAlgorithm::mutate(double mutation_proba, int parame
     }
 }
 
-double Genetic::CoverageGeneticAlgorithm::fitness(Genetic::Individual& individual, BooleanMatrix::BooleanMatrix& M)
+double Genetic::CoverageGeneticAlgorithm::fitness(Genetic::Individual& individual)
 {
     if(individual.is_from_zero_gen())
         return n;
