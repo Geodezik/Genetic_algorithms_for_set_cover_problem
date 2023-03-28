@@ -60,7 +60,7 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
         }
 
         //Mutate
-        mutate(mutation_proba, i);
+        mutate(M, mutation_proba, i);
 
         //Get scores
         if(i == 0) {
@@ -133,6 +133,29 @@ void Genetic::BaseGeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatri
         } else {
             std::cout << " not a covering" << std::endl;
         }
+    }
+}
+
+void Genetic::BaseGeneticAlgorithm::analyze_alikeness(int t)
+{
+    for(int i = 0; i < t; i++) {
+        int alike_counter = 0;
+
+        for(int j = 0; j < population_size; j++) {
+            if(i == j)
+                continue;
+
+            bool flag = true;
+            for(int k = 0; k < n; k++) {
+                if(population[i].genotype[k] != population[j].genotype[k]) {
+                    flag = false;
+                    break;
+                }
+            }
+            alike_counter += flag;
+        }
+
+        std::cout << i << "th individual is like " << alike_counter << " others" << std::endl;
     }
 }
 

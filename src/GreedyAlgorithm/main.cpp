@@ -6,10 +6,10 @@ using namespace Greedy;
 
 int main()
 {
-    int m = 5000;
-    int n = 5000;
+    int m = 1000;
+    int n = 1000;
 
-    double p = 0.001; //means!
+    double p = 0.1;
     std::random_device rd{};
     std::mt19937 rng{rd()};
     rng.seed(317);
@@ -30,7 +30,6 @@ int main()
         {0, 0, 0, 0, 0, 0, 0, 1, 0, 0}
     };
     */
-
     BooleanMatrix::BooleanMatrix M(m, n);
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < n; j++) {

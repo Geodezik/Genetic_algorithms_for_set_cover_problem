@@ -36,7 +36,7 @@ Genetic::Individual Genetic::CoverageGeneticAlgorithm::crossover(Individual& par
     return Individual(new_genotype);
 }
 
-void Genetic::CoverageGeneticAlgorithm::mutate(double mutation_proba, int parameter)
+void Genetic::CoverageGeneticAlgorithm::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter)
 {
     parameter = (n / 10) * (max_iter - parameter) / max_iter;
     std::bernoulli_distribution bernoulli_d(mutation_proba);
