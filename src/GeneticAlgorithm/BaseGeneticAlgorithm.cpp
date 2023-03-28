@@ -41,7 +41,7 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
     this->m = M.get_m();
     this->n = M.get_n();
 
-    create_zero_generation(n);
+    create_zero_generation(M, n);
 
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
@@ -60,18 +60,17 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
         }
 
         //Mutate
-        int mutations = (n / 10) * (max_iter - i) / max_iter;
-        mutate(mutation_proba, mutations);
+        mutate(mutation_proba, i);
 
         //Get scores
         if(i == 0) {
             scores.clear();
             for(int j = 0; j < extended_population_size; j++) {
-                scores.push_back(fitness(population[j]));
+                scores.push_back(fitness(M, population[j]));
             }
         } else {
             for(int j = population_size; j < extended_population_size; j++) {
-                scores[j] = fitness(population[j]);
+                scores[j] = fitness(M, population[j]);
             }
         }
 
@@ -100,7 +99,7 @@ void Genetic::BaseGeneticAlgorithm::print_individuals()
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::print_solution()
+void Genetic::BaseGeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
     if(n > 100) {
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
@@ -119,14 +118,14 @@ void Genetic::BaseGeneticAlgorithm::print_solution()
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::analyze_solution()
+void Genetic::BaseGeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M)
 {
     std::vector<int> scores;
     int genotype_len = population[0].size();
 
     std::cout << "Analyzing..." << std::endl;
     for(int j = 0; j < population.size(); j++) {
-        int f = fitness(population[j]);
+        int f = fitness(M, population[j]);
         std::cout << j + 1 << ") ";
         std::cout << "Fitness: " << f << ',';
         if(f < n + 1) {
@@ -137,10 +136,10 @@ void Genetic::BaseGeneticAlgorithm::analyze_solution()
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::print_fit_stats(std::string filename)
+void Genetic::BaseGeneticAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
 {
   std::ofstream f;
   f.open(filename, std::ofstream::app);
-  f << fit_time << " " << fitness(population[0]) << '\n';
+  f << fit_time << " " << fitness(M, population[0]) << '\n';
   f.close();
 }

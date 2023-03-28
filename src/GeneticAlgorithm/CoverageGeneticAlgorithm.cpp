@@ -4,7 +4,7 @@ Genetic::CoverageGeneticAlgorithm::CoverageGeneticAlgorithm(int population_size,
                                                             int max_iter): Genetic::BaseGeneticAlgorithm(population_size, extended_population_size,
                                                                                                          mutation_proba, max_iter) {}
 
-void Genetic::CoverageGeneticAlgorithm::create_zero_generation(int genotype_len)
+void Genetic::CoverageGeneticAlgorithm::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
 {
     //creating zero generation with some genes
     for(int i = 0; i < population_size; i++) {
@@ -38,6 +38,7 @@ Genetic::Individual Genetic::CoverageGeneticAlgorithm::crossover(Individual& par
 
 void Genetic::CoverageGeneticAlgorithm::mutate(double mutation_proba, int parameter)
 {
+    parameter = (n / 10) * (max_iter - parameter) / max_iter;
     std::bernoulli_distribution bernoulli_d(mutation_proba);
     int genotype_len = population[0].size();
     for(int mut_iter = 0; mut_iter < parameter; mut_iter++) {
@@ -53,7 +54,7 @@ void Genetic::CoverageGeneticAlgorithm::mutate(double mutation_proba, int parame
     }
 }
 
-double Genetic::CoverageGeneticAlgorithm::fitness(Genetic::Individual& individual)
+double Genetic::CoverageGeneticAlgorithm::fitness(BooleanMatrix::BooleanMatrix& M, Genetic::Individual& individual)
 {
     if(individual.is_from_zero_gen())
         return n;

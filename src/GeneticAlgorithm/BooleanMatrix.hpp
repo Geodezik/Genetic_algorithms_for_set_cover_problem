@@ -9,9 +9,9 @@ namespace BooleanMatrix {
 }
 
 class BooleanMatrix::BooleanMatrix {
+public:
     int m;
     int n;
-public:
     bool** M;
     BooleanMatrix(int m, int n);
     BooleanMatrix(const BooleanMatrix& B);
