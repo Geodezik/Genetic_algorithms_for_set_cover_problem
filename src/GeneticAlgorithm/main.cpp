@@ -14,7 +14,7 @@ int main()
     double p = 0.1;
     std::random_device rd{};
     std::mt19937 rng{rd()};
-    rng.seed(317);
+    rng.seed(228);
     std::bernoulli_distribution bd(p);
     std::uniform_int_distribution<> uid(1, n - 1);
 
@@ -42,10 +42,10 @@ int main()
     }
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100, str task
-    SotnezovGeneticAlgorithm A = SotnezovGeneticAlgorithm(10, 11, 1.0, 25000);
+    SotnezovGeneticAlgorithm A = SotnezovGeneticAlgorithm(100, 101, 1.0, 10000);
     // A.print_individuals();
     A.fit(M, 2, false);
-    A.analyze_alikeness(25);
+    A.analyze_alikeness(10);
     //A.print_solution(M);
     //A.print_fit_stats(M);
 

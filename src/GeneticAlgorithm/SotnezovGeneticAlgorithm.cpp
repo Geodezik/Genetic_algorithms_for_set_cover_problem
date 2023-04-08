@@ -106,7 +106,9 @@ int Genetic::SotnezovGeneticAlgorithm::get_maxscore_column(BooleanMatrix::Boolea
 
 void Genetic::SotnezovGeneticAlgorithm::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
 {
-    std::cout << best_score << std::endl;
+    this->m = M.get_m();
+    this->n = M.get_n();
+
     if(!best_score) {
         std::cout << "Default best score " << n << std::endl;
         best_score = n;
@@ -144,17 +146,63 @@ void Genetic::SotnezovGeneticAlgorithm::create_zero_generation(BooleanMatrix::Bo
 Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& parent1, Individual& parent2)
 {
     std::vector<bool> new_genotype;
-    int length = parent1.genotype.size();
-    std::uniform_int_distribution<> d(1, length - 1);
-    int point = d(rng);
+    // count relative scores (don't forget +1)
+    // find sum of all relatives
+    // create list of probabilities (1/fi) / sum
+    // sample two parents from distribution (different?)
+    // go through genes (get parents' relatives before) and choose FIRST gen with p = f2/(f1+f2) second otherwise
+    // create an Individual from this vector.
 
-    for(int i = 0; i < point; i++) {
-        new_genotype.push_back(parent1.genotype[i]);
+    // find rel_scores and rel_sum
+    int min_score = n + 1;
+    for(int i = 0; i < scores.size(); i++) {
+        if(scores[i] < min_score)
+            min_score = scores[i];
+    }
+    min_score--;
+    double rel_sum = 0;
+    std::vector<int> rel_scores = scores;
+    for(int i = 0; i < scores.size(); i++) {
+        rel_scores[i] -= min_score;
+        rel_sum += rel_scores[i];
     }
 
-    for(int i = point; i < length; i++) {
-        new_genotype.push_back(parent2.genotype[i]);
+    //build probs
+    std::vector<double> probs;
+    for(int i = 0; i < scores.size(); i++) {
+        probs.push_back((1.0 / scores[i]) / rel_sum);
     }
+    // std::cout << "SIZE" << probs.size() << ' ' << std::endl;
+
+    // sample two parents
+    std::discrete_distribution<> distr(probs.begin(), probs.end());
+    int p1 = distr(rng);
+    int p2 = distr(rng);
+    int f1 = rel_scores[p1];
+    int f2 = rel_scores[p2];
+    double p = f2 / (f1 + f2);
+    //std::cout << rel_scores[0] << rel_scores[1] << std::endl;
+    std::bernoulli_distribution bd(p);
+
+    // create set of genes
+    for(int i = 0; i < n; i++) {
+        if(population[p1].genotype[i] == population[p2].genotype[i]) {
+            new_genotype.push_back(population[p1].genotype[i]);
+            continue;
+        }
+        //std::cout << p1 << ' ';
+        //std::cout << population[p1].genotype[i];
+        //new_genotype.push_back(population[p1].genotype[i]);
+        if(bd(rng)) {
+            new_genotype.push_back(population[p1].genotype[i]);
+        } else {
+            new_genotype.push_back(population[p2].genotype[i]);
+        }
+    }
+    // std::cout << std::endl;
+
+    // std::cout << p1 << p2 << std::endl;
+    // new_genotype = population[0].genotype;
 
     return Individual(new_genotype);
 }
@@ -162,8 +210,10 @@ Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& par
 void Genetic::SotnezovGeneticAlgorithm::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter)
 {
     double K = 500.0;
-    double C = 1.0;
+    // double C = 0.00001;
+    double C = 0.00001;
     int number_of_mutations = K * (1.0 - 1.0 / (C * parameter + 1.0));
+    std::cout << "Mutations: " << number_of_mutations << std::endl;
     int genotype_len = population[0].size();
     int child_idx = population_size;
     for(int mut_iter = 0; mut_iter < number_of_mutations; mut_iter++) {
@@ -201,13 +251,42 @@ double Genetic::SotnezovGeneticAlgorithm::fitness(BooleanMatrix::BooleanMatrix& 
 void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
 {
     int child_score = scores[population_size];
+
+    // check if child (the last one) is in the population
+    bool child_in_population = false;
+    for(int i = 0; i < population_size; i++) {
+        bool flag = true;
+        for(int j = 0; j < n; j++) {
+            if(population[population_size].genotype[j] != population[i].genotype[j]) {
+                flag = false;
+                break;
+            }
+        }
+        if(flag) {
+            child_in_population = true;
+            break;
+        }
+    }
+
     bool hit_by_child = (child_score < best_score);
     if(hit_by_child) {
         //std::cout << "New best score " << child_score << std::endl;
         best_score = child_score;
     }
 
-    std::cout << "Generation: " << iteration << ", best score: " << best_score << ", hit by child: " << hit_by_child << std::endl << ", replacements: ";
+    std::cout << "Generation: " << iteration << ", best score: " << best_score << ", already in population: " << child_in_population << ", hit by child: " << hit_by_child << ", replacements: ";
+
+    if(child_in_population) {
+        std::cout << 0 << ", child score: " << child_score << std::endl;
+        unluck_counter++;
+        if(unluck_counter >= 10) {
+            unluck_counter = 0;
+            // recreate half population
+            
+        }
+        population.pop_back();
+        return;
+    }
 
     std::vector<int> worse;
     for(int i = 0; i < population_size; i++) {
@@ -219,6 +298,7 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
         std::cout << 0 << ", child score: " << child_score << std::endl;
         unluck_counter++;
         if(unluck_counter >= 10) {
+            unluck_counter = 0;
             // recreate half population
             
         }
@@ -230,6 +310,6 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
     std::uniform_int_distribution<> uid(0, worse.size() - 1);
     int random_individual = uid(rng);
     scores[worse[random_individual]] = child_score;
-    population[worse[random_individual]] = population.back();
+    population[worse[random_individual]] = population[population_size];
     population.pop_back();
 }

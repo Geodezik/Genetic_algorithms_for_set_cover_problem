@@ -43,6 +43,11 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
 
     create_zero_generation(M, n);
 
+    scores.clear();
+    for(int j = 0; j < population_size; j++) {
+        scores.push_back(fitness(M, population[j]));
+    }
+
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
     int genotype_len = population[0].genotype.size();
@@ -62,16 +67,9 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
         //Mutate
         mutate(M, mutation_proba, i);
 
-        //Get scores
-        if(i == 0) {
-            scores.clear();
-            for(int j = 0; j < extended_population_size; j++) {
-                scores.push_back(fitness(M, population[j]));
-            }
-        } else {
-            for(int j = population_size; j < extended_population_size; j++) {
-                scores[j] = fitness(M, population[j]);
-            }
+        //Get scores for new individuals
+        for(int j = population_size; j < extended_population_size; j++) {
+            scores[j] = fitness(M, population[j]);
         }
 
         //Selection
@@ -140,6 +138,7 @@ void Genetic::BaseGeneticAlgorithm::analyze_alikeness(int t)
 {
     for(int i = 0; i < t; i++) {
         int alike_counter = 0;
+        int example = -1;
 
         for(int j = 0; j < population_size; j++) {
             if(i == j)
@@ -152,10 +151,13 @@ void Genetic::BaseGeneticAlgorithm::analyze_alikeness(int t)
                     break;
                 }
             }
+            if(flag) {
+                example = j;
+            }
             alike_counter += flag;
         }
 
-        std::cout << i << "th individual is like " << alike_counter << " others" << std::endl;
+        std::cout << i << "th individual is like " << alike_counter << " others, " << "for example: " << example << std::endl;
     }
 }
 
