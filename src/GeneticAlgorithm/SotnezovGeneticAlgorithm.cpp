@@ -237,10 +237,16 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
         best_score = child_score;
     }
 
-    std::cout << "Generation: " << iteration << ", best score: " << best_score << ", already in this population: " << child_in_population << ", hit by child: " << hit_by_child;
+    if(verbose == 1) {
+        std::cout << best_score << std::endl;
+    } else if(verbose == 2) {
+        std::cout << "Generation: " << iteration << ", best score: " << best_score;
+        std::cout << ", already in this population: " << child_in_population << ", hit by child: " << hit_by_child;
+    }
 
     if(child_in_population) {
-        std::cout << ", replaced: " << "-" << ", child score: " << child_score << std::endl;
+        if(verbose == 2)
+            std::cout << ", replaced: " << "-" << ", child score: " << child_score << std::endl;
         unluck_counter++;
         if(unluck_counter >= 10) {
             unluck_counter = 0;
@@ -258,7 +264,8 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
     }
 
     if(!worse.size()) {
-        std::cout << ", replaced: " << "-" << ", child score: " << child_score << std::endl;
+        if(verbose == 2)
+            std::cout << ", replaced: " << "-" << ", child score: " << child_score << std::endl;
         unluck_counter++;
         if(unluck_counter >= 10) {
             unluck_counter = 0;
@@ -273,6 +280,7 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
     scores_sum -= (scores[worse[random_individual]] - child_score);
     scores[worse[random_individual]] = child_score;
     population[worse[random_individual]] = population[population_size];
-    std::cout << ", replaced: " << worse[random_individual] << ", child score: " << child_score << std::endl;
+    if(verbose == 2)
+        std::cout << ", replaced: " << worse[random_individual] << ", child score: " << child_score << std::endl;
     population.pop_back();
 }
