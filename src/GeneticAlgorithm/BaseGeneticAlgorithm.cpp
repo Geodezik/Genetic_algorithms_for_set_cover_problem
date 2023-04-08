@@ -41,6 +41,7 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
     this->m = M.get_m();
     this->n = M.get_n();
 
+    population.clear();
     create_zero_generation(M, n);
 
     scores.clear();
@@ -51,15 +52,12 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
     int genotype_len = population[0].genotype.size();
-    std::uniform_int_distribution<> parents_d(0, population_size - 1);
 
+    // choose parents
     for(int i = 0; i < max_iter; i++) {
         for(int j = 0; j < delta; j++) {
-            int p1, p2;
-            do {
-                p1 = parents_d(rng);
-                p2 = parents_d(rng);
-            } while (p1 == p2);
+            int p1 = 0, p2 = 0;
+            get_parent_indices(p1, p2);
             auto child = crossover(population[p1], population[p2]);
             population.push_back(child);
         }

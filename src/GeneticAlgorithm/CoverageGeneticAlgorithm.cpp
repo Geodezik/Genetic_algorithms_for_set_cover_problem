@@ -16,6 +16,15 @@ void Genetic::CoverageGeneticAlgorithm::create_zero_generation(BooleanMatrix::Bo
     };
 }
 
+void Genetic::CoverageGeneticAlgorithm::get_parent_indices(int& p1, int& p2)
+{
+    std::uniform_int_distribution<> parents_d(0, population_size - 1);
+    do {
+        p1 = parents_d(rng);
+        p2 = parents_d(rng);
+    } while (p1 == p2);
+}
+
 Genetic::Individual Genetic::CoverageGeneticAlgorithm::crossover(Individual& parent1, Individual& parent2)
 {
     // pick a random point (but not at the end of a chromosomes), then

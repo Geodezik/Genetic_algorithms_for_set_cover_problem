@@ -60,6 +60,7 @@ public:
 
     // TO IMPLEMENT
     virtual void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len) = 0;
+    virtual void get_parent_indices(int& p1, int& p2) = 0;
     virtual Individual crossover(Individual& parent1, Individual& parent2) = 0;
     virtual void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter) = 0;
     virtual double fitness(BooleanMatrix::BooleanMatrix& M, Individual& individual) = 0;
@@ -81,6 +82,7 @@ public:
     CoverageGeneticAlgorithm(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100);
 
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
+    void get_parent_indices(int& p1, int& p2);
     Individual crossover(Individual& parent1, Individual& parent2);
     void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter);
     double fitness(BooleanMatrix::BooleanMatrix& M, Individual& individual);
@@ -89,6 +91,7 @@ public:
 
 class Genetic::SotnezovGeneticAlgorithm: public Genetic::BaseGeneticAlgorithm {
     int best_score = 0;
+    int scores_sum = 0;
     int unluck_counter = 0;
 public:
     SotnezovGeneticAlgorithm(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100);
@@ -98,6 +101,7 @@ public:
     int get_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row);
 
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
+    void get_parent_indices(int& p1, int& p2);
     Individual crossover(Individual& parent1, Individual& parent2);
     void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter);
     double fitness(BooleanMatrix::BooleanMatrix& M, Individual& individual);

@@ -6,10 +6,6 @@ Genetic::SotnezovGeneticAlgorithm::SotnezovGeneticAlgorithm(int population_size,
 
 void Genetic::SotnezovGeneticAlgorithm::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
 {
-    // get score for each row (how many columns from covering cover it)
-    // count covered rows for each column, argsort columns by this
-    // go through argsort, remove columns that cover only rows with scores >= 2, decrease rows scores
-
     int row_scores[m] = {};
     std::vector<int> column_scores(n);
     for(int i = 0; i < m; i++) {
@@ -32,7 +28,6 @@ void Genetic::SotnezovGeneticAlgorithm::optimize_covering(BooleanMatrix::Boolean
 
         bool flag = true;
         for(int j = 0; j < m; j++) {
-            // if i covers this row and this row has score >=2 => OK. Otherwise drop flag and break.
             if(M[j][queue[i]]) {
                 if(row_scores[j] >= 2) {
                     continue;
@@ -43,7 +38,6 @@ void Genetic::SotnezovGeneticAlgorithm::optimize_covering(BooleanMatrix::Boolean
             }
         }
 
-        //if flag is true => can be kicked (and decrease scores in a loop)
         if(flag) {
             columns[queue[i]] = false;
             for(int j = 0; j < m; j++) {
@@ -106,15 +100,12 @@ int Genetic::SotnezovGeneticAlgorithm::get_maxscore_column(BooleanMatrix::Boolea
 
 void Genetic::SotnezovGeneticAlgorithm::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
 {
+    population.clear();
     this->m = M.get_m();
     this->n = M.get_n();
+    scores_sum = 0;
+    best_score = n;
 
-    if(!best_score) {
-        std::cout << "Default best score " << n << std::endl;
-        best_score = n;
-    }
-
-    population.clear();
     double p = 0.5;
     std::bernoulli_distribution bd(p);
     for(int i = 0; i < population_size; i++) {
@@ -131,57 +122,44 @@ void Genetic::SotnezovGeneticAlgorithm::create_zero_generation(BooleanMatrix::Bo
         }
 
         population.push_back(Individual(new_genes));
-        optimize_covering(M, population[i].genotype);
+        //optimize_covering(M, population[i].genotype);
 
         int f = fitness(M, population[i]);
-        //std::cout << f << ' ';
-        if(f < best_score) {
-            //std::cout << "New best score " << f << std::endl;
+        scores_sum += f;
+        if(f < best_score)
             best_score = f;
-        }
     }
-    //std::cout << std::endl;
+}
+
+void Genetic::SotnezovGeneticAlgorithm::get_parent_indices(int& p1, int& p2)
+{
+    // does nothing but called in base class
 }
 
 Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& parent1, Individual& parent2)
 {
     std::vector<bool> new_genotype;
-    // count relative scores (don't forget +1)
-    // find sum of all relatives
-    // create list of probabilities (1/fi) / sum
-    // sample two parents from distribution (different?)
-    // go through genes (get parents' relatives before) and choose FIRST gen with p = f2/(f1+f2) second otherwise
-    // create an Individual from this vector.
-
-    // find rel_scores and rel_sum
-    int min_score = n + 1;
-    for(int i = 0; i < scores.size(); i++) {
-        if(scores[i] < min_score)
-            min_score = scores[i];
-    }
-    min_score--;
-    double rel_sum = 0;
-    std::vector<int> rel_scores = scores;
-    for(int i = 0; i < scores.size(); i++) {
-        rel_scores[i] -= min_score;
-        rel_sum += rel_scores[i];
-    }
 
     //build probs
+    double rel_sum = scores_sum - (best_score - 1) * population_size;
+    if (rel_sum <= 0) {
+        std::cout << "WARNING: REL_SUM = 1" << std::endl;
+        rel_sum = 1;
+    }
     std::vector<double> probs;
     for(int i = 0; i < scores.size(); i++) {
-        probs.push_back((1.0 / scores[i]) / rel_sum);
+        int rel_score = scores[i] - best_score + 1;
+        probs.push_back((1.0 / rel_score) / rel_sum);
     }
-    // std::cout << "SIZE" << probs.size() << ' ' << std::endl;
 
     // sample two parents
     std::discrete_distribution<> distr(probs.begin(), probs.end());
     int p1 = distr(rng);
     int p2 = distr(rng);
-    int f1 = rel_scores[p1];
-    int f2 = rel_scores[p2];
+    std::cout << "Parents " << p1 << ", " << p2 << " with probs " << probs[p1] << ", " << probs[p2] << std::endl;
+    int f1 = scores[p1] - best_score + 1;
+    int f2 = scores[p2] - best_score + 1;
     double p = f2 / (f1 + f2);
-    //std::cout << rel_scores[0] << rel_scores[1] << std::endl;
     std::bernoulli_distribution bd(p);
 
     // create set of genes
@@ -190,28 +168,20 @@ Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& par
             new_genotype.push_back(population[p1].genotype[i]);
             continue;
         }
-        //std::cout << p1 << ' ';
-        //std::cout << population[p1].genotype[i];
-        //new_genotype.push_back(population[p1].genotype[i]);
         if(bd(rng)) {
             new_genotype.push_back(population[p1].genotype[i]);
         } else {
             new_genotype.push_back(population[p2].genotype[i]);
         }
     }
-    // std::cout << std::endl;
-
-    // std::cout << p1 << p2 << std::endl;
-    // new_genotype = population[0].genotype;
 
     return Individual(new_genotype);
 }
 
 void Genetic::SotnezovGeneticAlgorithm::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter)
 {
-    double K = 500.0;
-    // double C = 0.00001;
-    double C = 0.00001;
+    double K = 1000.0;
+    double C = 0.001;
     int number_of_mutations = K * (1.0 - 1.0 / (C * parameter + 1.0));
     std::cout << "Mutations: " << number_of_mutations << std::endl;
     int genotype_len = population[0].size();
@@ -222,23 +192,18 @@ void Genetic::SotnezovGeneticAlgorithm::mutate(BooleanMatrix::BooleanMatrix& M, 
         population[child_idx].genotype[random_gen] = !population[child_idx].genotype[random_gen];
     }
 
-    //recovering
+    //reCOVERING (haha)
     std::vector<bool> covered_rows = get_covered_rows(M, population[child_idx].genotype);
     for(int j = 0; j < covered_rows.size(); j++) {
         if(covered_rows[j])
             continue;
-        //cover this and many (works with side effect)
         int argmax_score = get_maxscore_column(M, covered_rows, population[child_idx].genotype, j);
     }
-    // + make irreducible
     optimize_covering(M, population[child_idx].genotype);
-    //std::cout << "Child fitness: " << fitness(M, population[child_idx]) << std::endl;
-    // std::cout << M.is_covered_by(population[child_idx].genotype) << std::endl;
 }
 
 double Genetic::SotnezovGeneticAlgorithm::fitness(BooleanMatrix::BooleanMatrix& M, Genetic::Individual& individual)
 {
-    // Cheap!
     int ones_counter = 0;
     for(int i = 0; i < individual.size(); i++) {
         if(individual.genotype[i])
@@ -252,7 +217,6 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
 {
     int child_score = scores[population_size];
 
-    // check if child (the last one) is in the population
     bool child_in_population = false;
     for(int i = 0; i < population_size; i++) {
         bool flag = true;
@@ -274,14 +238,14 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
         best_score = child_score;
     }
 
-    std::cout << "Generation: " << iteration << ", best score: " << best_score << ", already in population: " << child_in_population << ", hit by child: " << hit_by_child << ", replacements: ";
+    std::cout << "Generation: " << iteration << ", best score: " << best_score << ", already in this population: " << child_in_population << ", hit by child: " << hit_by_child;
 
     if(child_in_population) {
-        std::cout << 0 << ", child score: " << child_score << std::endl;
+        std::cout << ", replaced: " << "-" << ", child score: " << child_score << std::endl;
         unluck_counter++;
         if(unluck_counter >= 10) {
             unluck_counter = 0;
-            // recreate half population
+            // recreate half population ?
             
         }
         population.pop_back();
@@ -295,21 +259,21 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
     }
 
     if(!worse.size()) {
-        std::cout << 0 << ", child score: " << child_score << std::endl;
+        std::cout << ", replaced: " << "-" << ", child score: " << child_score << std::endl;
         unluck_counter++;
         if(unluck_counter >= 10) {
             unluck_counter = 0;
-            // recreate half population
+            // recreate half population ?
             
         }
         return;
     }
 
-    //replace one of bad
-    std::cout << 1 << ", child score: " << child_score << std::endl;
     std::uniform_int_distribution<> uid(0, worse.size() - 1);
     int random_individual = uid(rng);
+    scores_sum -= (scores[worse[random_individual]] - child_score);
     scores[worse[random_individual]] = child_score;
     population[worse[random_individual]] = population[population_size];
+    std::cout << ", replaced: " << worse[random_individual] << ", child score: " << child_score << std::endl;
     population.pop_back();
 }

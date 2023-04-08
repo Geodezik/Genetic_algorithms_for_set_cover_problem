@@ -6,10 +6,10 @@ using namespace Greedy;
 
 int main()
 {
-    int m = 1000;
-    int n = 1000;
+    int m = 2500;
+    int n = 10000;
+    double p = 0.0005;
 
-    double p = 0.1;
     std::random_device rd{};
     std::mt19937 rng{rd()};
     rng.seed(317);
