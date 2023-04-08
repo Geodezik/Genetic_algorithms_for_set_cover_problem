@@ -94,7 +94,7 @@ class Genetic::SotnezovGeneticAlgorithm: public Genetic::BaseGeneticAlgorithm {
     int scores_sum = 0;
     int unluck_counter = 0;
 public:
-    SotnezovGeneticAlgorithm(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100);
+    SotnezovGeneticAlgorithm(int population_size, int max_iter = 100);
 
     void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
     std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> columns);

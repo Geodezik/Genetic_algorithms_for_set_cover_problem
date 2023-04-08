@@ -1,8 +1,7 @@
 #include "Genetic.hpp"
 
-Genetic::SotnezovGeneticAlgorithm::SotnezovGeneticAlgorithm(int population_size, int extended_population_size, double mutation_proba,
-                                                            int max_iter): Genetic::BaseGeneticAlgorithm(population_size, extended_population_size,
-                                                                                                         mutation_proba, max_iter) {}
+Genetic::SotnezovGeneticAlgorithm::SotnezovGeneticAlgorithm(int population_size, int max_iter): Genetic::BaseGeneticAlgorithm(population_size,
+                                                                                                population_size + 1, 1.0, max_iter) {}
 
 void Genetic::SotnezovGeneticAlgorithm::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
 {
