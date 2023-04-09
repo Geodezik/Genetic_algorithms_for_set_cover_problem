@@ -6,7 +6,7 @@ using namespace Greedy;
 
 int main()
 {
-    int m = 1000;
+    int m = 10000;
     int n = 10000;
     double p = 0.0004;
 

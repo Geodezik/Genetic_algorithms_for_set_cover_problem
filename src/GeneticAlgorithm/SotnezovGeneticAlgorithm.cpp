@@ -179,12 +179,12 @@ Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& par
 
 void Genetic::SotnezovGeneticAlgorithm::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter)
 {
-    double K = 50.0;
-    double C = 0.1;
+    double K = 250.0;
+    double C = 0.01;
     // double T = 250;
     int number_of_mutations = K * (1.0 - 1.0 / (C * parameter + 1.0));
 
-    //std::cout << "Generation: " << parameter << ", mutations: " << number_of_mutations << std::endl;
+    std::cout << "Generation: " << parameter << ", mutations: " << number_of_mutations << std::endl;
     int genotype_len = population[0].size();
     int child_idx = population_size;
     for(int mut_iter = 0; mut_iter < number_of_mutations; mut_iter++) {
