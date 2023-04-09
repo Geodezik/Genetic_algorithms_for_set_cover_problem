@@ -6,9 +6,9 @@ using namespace Greedy;
 
 int main()
 {
-    int m = 2500;
+    int m = 1000;
     int n = 10000;
-    double p = 0.0005;
+    double p = 0.0004;
 
     std::random_device rd{};
     std::mt19937 rng{rd()};

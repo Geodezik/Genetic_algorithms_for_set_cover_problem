@@ -8,9 +8,9 @@ using namespace Genetic;
 
 int main()
 {
-    int m = 2500;
+    int m = 1000;
     int n = 10000;
-    double p = 0.0005;
+    double p = 0.0004;
 
     std::random_device rd{};
     std::mt19937 rng{rd()};
@@ -42,9 +42,9 @@ int main()
     }
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100, str task
-    SotnezovGeneticAlgorithm A = SotnezovGeneticAlgorithm(100, 1500);
+    SotnezovGeneticAlgorithm A = SotnezovGeneticAlgorithm(100, 5000);
     // A.print_individuals();
-    A.fit(M, 2, false);
+    A.fit(M, 1, false);
     //A.print_solution(M);
     //A.print_fit_stats(M);
 

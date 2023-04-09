@@ -155,7 +155,7 @@ Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& par
     std::discrete_distribution<> distr(probs.begin(), probs.end());
     int p1 = distr(rng);
     int p2 = distr(rng);
-    std::cout << "Parents " << p1 << ", " << p2 << " with probs " << probs[p1] << ", " << probs[p2] << std::endl;
+    // std::cout << "Parents " << p1 << ", " << p2 << " with probs " << probs[p1] << ", " << probs[p2] << std::endl;
     int f1 = scores[p1] - best_score + 1;
     int f2 = scores[p2] - best_score + 1;
     double p = f2 / (f1 + f2);
@@ -179,10 +179,12 @@ Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& par
 
 void Genetic::SotnezovGeneticAlgorithm::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter)
 {
-    double K = 1000.0;
-    double C = 0.001;
+    double K = 50.0;
+    double C = 0.1;
+    // double T = 250;
     int number_of_mutations = K * (1.0 - 1.0 / (C * parameter + 1.0));
-    std::cout << "Mutations: " << number_of_mutations << std::endl;
+
+    //std::cout << "Generation: " << parameter << ", mutations: " << number_of_mutations << std::endl;
     int genotype_len = population[0].size();
     int child_idx = population_size;
     for(int mut_iter = 0; mut_iter < number_of_mutations; mut_iter++) {
