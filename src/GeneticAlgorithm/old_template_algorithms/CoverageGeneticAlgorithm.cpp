@@ -1,5 +1,3 @@
-#include "Genetic.hpp"
-
 Genetic::CoverageGeneticAlgorithm::CoverageGeneticAlgorithm(int population_size, int extended_population_size, double mutation_proba,
                                                             int max_iter): Genetic::BaseGeneticAlgorithm(population_size, extended_population_size,
                                                                                                          mutation_proba, max_iter) {}

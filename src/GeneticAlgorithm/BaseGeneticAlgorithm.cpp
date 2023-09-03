@@ -159,6 +159,6 @@ void Genetic::BaseGeneticAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix
 {
   std::ofstream f;
   f.open(filename, std::ofstream::app);
-  f << fit_time << " " << fitness(M, population[0]) << '\n';
+  f << fit_time << " " << fitness(M, get_best_individual()) << '\n';
   f.close();
 }
