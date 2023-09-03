@@ -16,7 +16,7 @@ int main()
     int K = 100;
     float C = 0.01;
     int population_size = 25;
-    int max_iter = 10;
+    int max_iter = 250;
 
     std::random_device rd{};
     std::mt19937 rng{rd()};

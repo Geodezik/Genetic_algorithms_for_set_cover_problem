@@ -143,12 +143,12 @@ void BCGA::BaseBCGA::analyze_alikeness(int t)
                 continue;
 
             bool flag = true;
-            for(int k = 0; k < n; k++) {
+            for(int k = 0; k < n; k++)
                 if(population[i].genotype[k] != population[j].genotype[k]) {
                     flag = false;
                     break;
                 }
-            }
+
             if(flag)
                 example = j;
             alike_counter += flag;

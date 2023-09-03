@@ -13,14 +13,12 @@ void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std:
 {
     int row_scores[m] = {};
     std::vector<int> column_scores(n);
-    for(int i = 0; i < m; i++) {
-        for(int j = 0; j < n; j++) {
+    for(int i = 0; i < m; i++)
+        for(int j = 0; j < n; j++)
             if(M[i][j] & columns[j]) {
                 row_scores[i]++;
                 column_scores[j]++;
             }
-        }
-    }
 
     std::vector<int> queue = argsort(column_scores);
     for(int i = 0; i < n; i++) {
@@ -32,24 +30,20 @@ void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std:
         }
 
         bool flag = true;
-        for(int j = 0; j < m; j++) {
-            if(M[j][queue[i]]) {
-                if(row_scores[j] >= 2) {
-                    continue;
-                } else {
-                    flag = false;
-                    break;
-                }
+        for(int j = 0; j < m; j++)
+            if(M[j][queue[i]] && (row_scores[j] < 2)) {
+                flag = false;
+                break;
             }
-        }
 
-        if(flag) {
-            columns[queue[i]] = false;
-            for(int j = 0; j < m; j++) {
-                // Decrease scores
-                if(M[j][queue[i]])
-                        row_scores[j]--;
-            }
+        if(!flag)
+            continue;
+
+        columns[queue[i]] = false;
+        for(int j = 0; j < m; j++) {
+            // Decrease scores
+            if(M[j][queue[i]])
+                    row_scores[j]--;
         }
     }
 }
@@ -59,15 +53,12 @@ std::vector<bool> BCGA::SotnezovBCGA::get_covered_rows(BooleanMatrix::BooleanMat
     std::vector<bool> covered_rows;
     for(int i = 0; i < m; i++) {
         bool flag = true;
-        for(int j = 0; j < n; j++) {
+        for(int j = 0; j < n; j++)
             if(M[i][j] & columns[j]) {
-                covered_rows.push_back(true);
                 flag = false;
                 break;
             }
-        }
-        if(flag)
-            covered_rows.push_back(false);
+        covered_rows.push_back(flag);
     }
 
     return covered_rows;
@@ -82,9 +73,8 @@ int BCGA::SotnezovBCGA::get_maxscore_column(BooleanMatrix::BooleanMatrix& M, std
         if(!M[row][i] || columns[i])
             continue;
         int score = 1;
-        for(int j = row + 1; j < m; j++) {
+        for(int j = row + 1; j < m; j++)
             score += (M[j][i] && !covered_rows[j]);
-        }
         if(score > max_score) {
             max_score = score;
             argmax_score = i;
@@ -92,10 +82,9 @@ int BCGA::SotnezovBCGA::get_maxscore_column(BooleanMatrix::BooleanMatrix& M, std
     }
 
     //covers some others
-    for(int i = 0; i < m; i++) {
+    for(int i = 0; i < m; i++)
         if(M[i][argmax_score])
             covered_rows[i] = true;
-    }
 
     //!!!
     columns[argmax_score] = true;
@@ -115,9 +104,8 @@ void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M,
     std::bernoulli_distribution bd(p);
     for(int i = 0; i < population_size; i++) {
         std::vector<bool> new_genes;
-        for(int j = 0; j < genotype_len; j++) {
+        for(int j = 0; j < genotype_len; j++)
             new_genes.push_back(bd(rng));
-        }
         std::vector<bool> covered_rows = get_covered_rows(M, new_genes);
         for(int j = 0; j < covered_rows.size(); j++) {
             if(covered_rows[j])
@@ -175,11 +163,10 @@ BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, 
             new_genotype.push_back(population[p1].genotype[i]);
             continue;
         }
-        if(bd(rng)) {
+        if(bd(rng))
             new_genotype.push_back(population[p1].genotype[i]);
-        } else {
+        else
             new_genotype.push_back(population[p2].genotype[i]);
-        }
     }
 
     return BinaryIndividual(new_genotype);
@@ -211,10 +198,9 @@ void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation
 double BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int ones_counter = 0;
-    for(int i = 0; i < individual.size(); i++) {
+    for(int i = 0; i < individual.size(); i++)
         if(individual.genotype[i])
             ones_counter++;
-    }
 
     return ones_counter;
 }
@@ -224,10 +210,9 @@ void BCGA::SotnezovBCGA::selection(int iteration)
     int child_score = scores[population_size];
     bool child_in_population = false;
     bool hit_by_child = (child_score < best_score);
-    if(hit_by_child) {
-        //std::cout << "New best score " << child_score << std::endl;
+    if(hit_by_child) 
         best_score = child_score;
-    } else {
+    else {
         for(int i = 0; i < population_size; i++) {
             bool flag = true;
             for(int j = 0; j < n; j++)
@@ -235,10 +220,12 @@ void BCGA::SotnezovBCGA::selection(int iteration)
                     flag = false;
                     break;
                 }
-            if(flag) {
-                child_in_population = true;
-                break;
-            }
+
+            if(!flag)
+                continue;
+
+            child_in_population = true;
+            break;
         }
     }
 
