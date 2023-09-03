@@ -12,12 +12,14 @@ std::vector<int> BCGA::BaseBCGA::argsort(const std::vector<T> &v) {
     return idx;
 }
 
-BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter)
+BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter, int seed)
 {
     this->population_size = population_size;
     this->extended_population_size = extended_population_size;
     this->max_iter = max_iter;
     this->mutation_proba =  mutation_proba;
+    if(seed >= 0)
+        this->rng = std::mt19937(seed);
 }
 
 void BCGA::BaseBCGA::print_stats(std::vector<int>& argbest, int iteration, int verbose)

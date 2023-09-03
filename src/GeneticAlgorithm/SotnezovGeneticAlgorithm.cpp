@@ -1,6 +1,7 @@
 #include "Genetic.hpp"
 
-BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int max_iter): BCGA::BaseBCGA(population_size, population_size + 1, 1.0, max_iter) {}
+BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int max_iter, int seed): BCGA::BaseBCGA(population_size,
+                                 population_size + 1, 1.0, max_iter, seed) {}
 
 void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
 {
@@ -267,7 +268,7 @@ void BCGA::SotnezovBCGA::selection(int iteration, int verbose)
         return;
     }
 
-    // replace with % in future!
+    // replace with % in future?
     std::uniform_int_distribution<> uid(0, worse.size() - 1);
     int random_individual = uid(rng);
     scores_sum -= (scores[worse[random_individual]] - child_score);

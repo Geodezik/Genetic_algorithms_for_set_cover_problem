@@ -16,10 +16,10 @@ bool BCGA::BinaryIndividual::is_from_zero_gen()
     return zero_gen;
 }
 
-std::ostream& BCGA::operator<<(std::ostream& os, const BinaryIndividual& I)
+std::ostream& BCGA::operator<<(std::ostream& os, const BinaryIndividual& individual)
 {
-    for(int i = 0; i < I.genotype.size(); i++) {
-        os << I.genotype[i] << " ";
+    for(int i = 0; i < individual.genotype.size(); i++) {
+        os << individual.genotype[i] << " ";
     }
     return os;
 }

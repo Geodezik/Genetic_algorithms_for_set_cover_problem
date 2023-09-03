@@ -29,14 +29,13 @@ public:
     bool is_from_zero_gen();
 
     friend BCGA::BaseBCGA;
-    friend std::ostream& BCGA::operator<<(std::ostream& os, const BCGA::BinaryIndividual& I);
+    friend std::ostream& BCGA::operator<<(std::ostream& os, const BCGA::BinaryIndividual& individual);
 };
 
 class BCGA::BaseBCGA {
 protected:
     std::vector<BinaryIndividual> population;
     std::vector<int> scores;
-
     std::mt19937 rng;
 
     int max_iter;
@@ -55,7 +54,7 @@ protected:
     std::vector<int> argsort(const std::vector<T> &v);
 
 public:
-    BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100);
+    BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100, int seed = -1);
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
     void print_stats(std::vector<int>& argbest, int iteration, int verbose);
 
@@ -82,7 +81,7 @@ class BCGA::SotnezovBCGA: public BCGA::BaseBCGA {
     int scores_sum = 0;
     int unluck_counter = 0;
 public:
-    SotnezovBCGA(int population_size, int max_iter = 100);
+    SotnezovBCGA(int population_size, int max_iter = 100, int seed = -1);
 
     void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
     std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> columns);
