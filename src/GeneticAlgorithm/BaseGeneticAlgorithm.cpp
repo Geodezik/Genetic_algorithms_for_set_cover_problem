@@ -12,25 +12,26 @@ std::vector<int> BCGA::BaseBCGA::argsort(const std::vector<T> &v) {
     return idx;
 }
 
-BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter, int seed)
+BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter, int seed, OutputMode verbose)
 {
     this->population_size = population_size;
     this->extended_population_size = extended_population_size;
     this->max_iter = max_iter;
     this->mutation_proba =  mutation_proba;
+    this->verbose = verbose;
     if(seed >= 0)
         this->rng = std::mt19937(seed);
 }
 
-void BCGA::BaseBCGA::print_stats(std::vector<int>& argbest, int iteration, int verbose)
+void BCGA::BaseBCGA::print_stats(std::vector<int>& argbest, int iteration)
 {
     switch(verbose) {
-        case 0:
+        case OutputMode::Silent:
             break;
-        case 1:
+        case OutputMode::Normal:
             std::cout << scores[argbest[0]] << std::endl;
             break;
-        case 2:
+        case OutputMode::Max:
             std::cout << "Generation: " << iteration + 1 << std::endl;
             std::cout << "Best individual fitness: " << scores[argbest[0]] << std::endl;
             std::cout << std::endl;
@@ -38,7 +39,7 @@ void BCGA::BaseBCGA::print_stats(std::vector<int>& argbest, int iteration, int v
     }
 }
 
-void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
+void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M) {
     std::time_t start = std::time(nullptr);
     this->m = M.get_m();
     this->n = M.get_n();
@@ -71,13 +72,13 @@ void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool fini
             scores[j] = fitness(M, population[j]);
 
         //Selection
-        selection(i, verbose);
+        selection(i);
     }
 
     std::time_t finish = std::time(nullptr);
     fit_time =  finish - start;
 
-    if(finishing_message) {
+    if(verbose == OutputMode::Max) {
         std::cout << "Learning finished in " << fit_time << " s" << std::endl;
         std::cout << std::endl;
     }

@@ -15,6 +15,7 @@ namespace BCGA {
     class BaseBCGA;
     class SotnezovBCGA;
     class BinaryIndividual;
+    enum class OutputMode {Silent, Normal, Max};
     std::ostream& operator<<(std::ostream& os, const BinaryIndividual& I);
 };
 
@@ -49,14 +50,16 @@ protected:
     int n;
 
     double fit_time;
+    OutputMode verbose = OutputMode::Normal;
 
     template <typename T>
     std::vector<int> argsort(const std::vector<T> &v);
 
 public:
-    BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100, int seed = -1);
-    void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
-    void print_stats(std::vector<int>& argbest, int iteration, int verbose);
+    BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100,
+             int seed = -1, OutputMode verbose = OutputMode::Normal);
+    void fit(BooleanMatrix::BooleanMatrix& M);
+    void print_stats(std::vector<int>& argbest, int iteration);
 
     // TO IMPLEMENT
     virtual void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len) = 0;
@@ -64,7 +67,7 @@ public:
     virtual BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2) = 0;
     virtual void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter) = 0;
     virtual double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual) = 0;
-    virtual void selection(int iteration, int verbose) = 0;
+    virtual void selection(int iteration) = 0;
 
     BinaryIndividual& get_best_individual();
     void create_matrix(int m, int n);
@@ -81,7 +84,7 @@ class BCGA::SotnezovBCGA: public BCGA::BaseBCGA {
     int scores_sum = 0;
     int unluck_counter = 0;
 public:
-    SotnezovBCGA(int population_size, int max_iter = 100, int seed = -1);
+    SotnezovBCGA(int population_size, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
 
     void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
     std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> columns);
@@ -92,7 +95,7 @@ public:
     BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2);
     void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter);
     double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
-    void selection(int iteration, int verbose);
+    void selection(int iteration);
 };
 
 #endif

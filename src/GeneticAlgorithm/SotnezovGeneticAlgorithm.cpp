@@ -1,7 +1,7 @@
 #include "Genetic.hpp"
 
-BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int max_iter, int seed): BCGA::BaseBCGA(population_size,
-                                 population_size + 1, 1.0, max_iter, seed) {}
+BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int max_iter, int seed, OutputMode verbose): BCGA::BaseBCGA(population_size,
+                                 population_size + 1, 1.0, max_iter, seed, verbose) {}
 
 void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
 {
@@ -216,7 +216,7 @@ double BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::Binary
     return ones_counter;
 }
 
-void BCGA::SotnezovBCGA::selection(int iteration, int verbose)
+void BCGA::SotnezovBCGA::selection(int iteration)
 {
     int child_score = scores[population_size];
     bool child_in_population = false;
@@ -224,7 +224,6 @@ void BCGA::SotnezovBCGA::selection(int iteration, int verbose)
     if(hit_by_child) {
         //std::cout << "New best score " << child_score << std::endl;
         best_score = child_score;
-        child_in_population = true;
     } else {
         for(int i = 0; i < population_size; i++) {
             bool flag = true;
@@ -240,9 +239,9 @@ void BCGA::SotnezovBCGA::selection(int iteration, int verbose)
         }
     }
 
-    if(verbose == 1) {
-        std::cout << best_score << std::endl;
-    } else if(verbose == 2) {
+    if(verbose == OutputMode::Normal)
+        std::cout << "Generation: " << iteration << ", best score: " << best_score << std::endl;
+    else if(verbose == OutputMode::Max) {
         std::cout << "Generation: " << iteration << ", best score: " << best_score;
         std::cout << ", already in this population: " << child_in_population << ", hit by child: " << hit_by_child;
     }
@@ -256,8 +255,8 @@ void BCGA::SotnezovBCGA::selection(int iteration, int verbose)
     // track cases when child should NOT be included
     bool bad_child = (worse.size() == 0);
     if(child_in_population || bad_child) {
-        if(verbose == 2)
-            std::cout << ", replaced: " << "-" << ", child score: " << child_score << std::endl;
+        if(verbose == OutputMode::Max)
+            std::cout << ", replaced: " << "None" << ", child score: " << child_score << std::endl;
         unluck_counter++;
         if(unluck_counter >= 10) {
             unluck_counter = 0;
@@ -276,7 +275,7 @@ void BCGA::SotnezovBCGA::selection(int iteration, int verbose)
     population[worse[random_individual]] = population[population_size];
     if(hit_by_child)
         best_index = worse[random_individual];
-    if(verbose == 2)
+    if(verbose == OutputMode::Max)
         std::cout << ", replaced: " << worse[random_individual] << ", child score: " << child_score << std::endl;
     population.pop_back();
 }
