@@ -1,7 +1,7 @@
 #include "Genetic.hpp"
 
 template <typename T>
-std::vector<int> Genetic::BaseGeneticAlgorithm::argsort(const std::vector<T> &v) {
+std::vector<int> BCGA::BaseBCGA::argsort(const std::vector<T> &v) {
     //Argsort for any type of elem-comparable vectors
     std::vector<int> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
@@ -12,7 +12,7 @@ std::vector<int> Genetic::BaseGeneticAlgorithm::argsort(const std::vector<T> &v)
     return idx;
 }
 
-Genetic::BaseGeneticAlgorithm::BaseGeneticAlgorithm(int population_size, int extended_population_size, double mutation_proba, int max_iter)
+BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter)
 {
     this->population_size = population_size;
     this->extended_population_size = extended_population_size;
@@ -20,7 +20,7 @@ Genetic::BaseGeneticAlgorithm::BaseGeneticAlgorithm(int population_size, int ext
     this->mutation_proba =  mutation_proba;
 }
 
-void Genetic::BaseGeneticAlgorithm::print_stats(std::vector<int>& argbest, int iteration, int verbose)
+void BCGA::BaseBCGA::print_stats(std::vector<int>& argbest, int iteration, int verbose)
 {
     switch(verbose) {
         case 0:
@@ -36,7 +36,7 @@ void Genetic::BaseGeneticAlgorithm::print_stats(std::vector<int>& argbest, int i
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
+void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M, int verbose, bool finishing_message) {
     std::time_t start = std::time(nullptr);
     this->m = M.get_m();
     this->n = M.get_n();
@@ -81,20 +81,20 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
     }
 }
 
-Genetic::Individual& Genetic::BaseGeneticAlgorithm::get_best_individual()
+BCGA::BinaryIndividual& BCGA::BaseBCGA::get_best_individual()
 {
     if ((best_index >= population_size) || (best_index == -1))
         throw std::out_of_range("Solution index (best_index) either wasn't defined or out of range");
     return population[best_index];
 }
 
-void Genetic::BaseGeneticAlgorithm::print_individuals()
+void BCGA::BaseBCGA::print_individuals()
 {
     for(int i = 0; i < population_size; i++)
         std::cout << population[i] << std::endl;
 }
 
-void Genetic::BaseGeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
+void BCGA::BaseBCGA::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
     if(n > 100)
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
@@ -112,7 +112,7 @@ void Genetic::BaseGeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix&
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatrix& M)
+void BCGA::BaseBCGA::analyze_solution(BooleanMatrix::BooleanMatrix& M)
 {
     std::vector<int> scores;
     int genotype_len = population[0].size();
@@ -129,7 +129,7 @@ void Genetic::BaseGeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatri
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::analyze_alikeness(int t)
+void BCGA::BaseBCGA::analyze_alikeness(int t)
 {
     for(int i = 0; i < t; i++) {
         int alike_counter = 0;
@@ -155,7 +155,7 @@ void Genetic::BaseGeneticAlgorithm::analyze_alikeness(int t)
     }
 }
 
-void Genetic::BaseGeneticAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
+void BCGA::BaseBCGA::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
 {
   std::ofstream f;
   f.open(filename, std::ofstream::app);

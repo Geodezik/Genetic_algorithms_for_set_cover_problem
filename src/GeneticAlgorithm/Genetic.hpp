@@ -11,31 +11,30 @@
 #include <stdexcept>
 #include "BooleanMatrix.hpp"
 
-namespace Genetic {
-    class BaseGeneticAlgorithm;
-    class SotnezovGeneticAlgorithm;
-
-    class Individual;
-    std::ostream& operator<<(std::ostream& os, const Individual& I);
+namespace BCGA {
+    class BaseBCGA;
+    class SotnezovBCGA;
+    class BinaryIndividual;
+    std::ostream& operator<<(std::ostream& os, const BinaryIndividual& I);
 };
 
-class Genetic::Individual {
+class BCGA::BinaryIndividual {
     bool zero_gen;
 public:
     std::vector<bool> genotype;
 
-    Individual(std::vector<bool>& genotype, bool zero_gen=false);
+    BinaryIndividual(std::vector<bool>& genotype, bool zero_gen=false);
 
     int size();
     bool is_from_zero_gen();
 
-    friend Genetic::BaseGeneticAlgorithm;
-    friend std::ostream& Genetic::operator<<(std::ostream& os, const Genetic::Individual& I);
+    friend BCGA::BaseBCGA;
+    friend std::ostream& BCGA::operator<<(std::ostream& os, const BCGA::BinaryIndividual& I);
 };
 
-class Genetic::BaseGeneticAlgorithm {
+class BCGA::BaseBCGA {
 protected:
-    std::vector<Individual> population;
+    std::vector<BinaryIndividual> population;
     std::vector<int> scores;
 
     std::mt19937 rng;
@@ -56,19 +55,19 @@ protected:
     std::vector<int> argsort(const std::vector<T> &v);
 
 public:
-    BaseGeneticAlgorithm(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100);
+    BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100);
     void fit(BooleanMatrix::BooleanMatrix& M, int verbose = 2, bool finishing_message = true);
     void print_stats(std::vector<int>& argbest, int iteration, int verbose);
 
     // TO IMPLEMENT
     virtual void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len) = 0;
     virtual void get_parent_indices(int& p1, int& p2) = 0;
-    virtual Individual crossover(Individual& parent1, Individual& parent2) = 0;
+    virtual BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2) = 0;
     virtual void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter) = 0;
-    virtual double fitness(BooleanMatrix::BooleanMatrix& M, Individual& individual) = 0;
+    virtual double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual) = 0;
     virtual void selection(int iteration, int verbose) = 0;
 
-    Individual& get_best_individual();
+    BinaryIndividual& get_best_individual();
     void create_matrix(int m, int n);
     void print_individuals();
     void print_solution(BooleanMatrix::BooleanMatrix& M);
@@ -76,14 +75,14 @@ public:
     void analyze_alikeness(int t);
     void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename="results.txt");
 
-    ~BaseGeneticAlgorithm() {};
+    ~BaseBCGA() {};
 };
 
-class Genetic::SotnezovGeneticAlgorithm: public Genetic::BaseGeneticAlgorithm {
+class BCGA::SotnezovBCGA: public BCGA::BaseBCGA {
     int scores_sum = 0;
     int unluck_counter = 0;
 public:
-    SotnezovGeneticAlgorithm(int population_size, int max_iter = 100);
+    SotnezovBCGA(int population_size, int max_iter = 100);
 
     void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
     std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> columns);
@@ -91,9 +90,9 @@ public:
 
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
     void get_parent_indices(int& p1, int& p2);
-    Individual crossover(Individual& parent1, Individual& parent2);
+    BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2);
     void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter);
-    double fitness(BooleanMatrix::BooleanMatrix& M, Individual& individual);
+    double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     void selection(int iteration, int verbose);
 };
 

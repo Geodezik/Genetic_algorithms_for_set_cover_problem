@@ -1,9 +1,8 @@
 #include "Genetic.hpp"
 
-Genetic::SotnezovGeneticAlgorithm::SotnezovGeneticAlgorithm(int population_size, int max_iter): Genetic::BaseGeneticAlgorithm(population_size,
-                                                                                                population_size + 1, 1.0, max_iter) {}
+BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int max_iter): BCGA::BaseBCGA(population_size, population_size + 1, 1.0, max_iter) {}
 
-void Genetic::SotnezovGeneticAlgorithm::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
+void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
 {
     int row_scores[m] = {};
     std::vector<int> column_scores(n);
@@ -48,7 +47,7 @@ void Genetic::SotnezovGeneticAlgorithm::optimize_covering(BooleanMatrix::Boolean
     }
 }
 
-std::vector<bool> Genetic::SotnezovGeneticAlgorithm::get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> columns)
+std::vector<bool> BCGA::SotnezovBCGA::get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> columns)
 {
     std::vector<bool> covered_rows;
     for(int i = 0; i < m; i++) {
@@ -67,7 +66,7 @@ std::vector<bool> Genetic::SotnezovGeneticAlgorithm::get_covered_rows(BooleanMat
     return covered_rows;
 }
 
-int Genetic::SotnezovGeneticAlgorithm::get_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row)
+int BCGA::SotnezovBCGA::get_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row)
 {
     int max_score = 0;
     int argmax_score = 0;
@@ -97,7 +96,7 @@ int Genetic::SotnezovGeneticAlgorithm::get_maxscore_column(BooleanMatrix::Boolea
     return argmax_score;
 }
 
-void Genetic::SotnezovGeneticAlgorithm::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
+void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
 {
     population.clear();
     this->m = M.get_m();
@@ -120,7 +119,7 @@ void Genetic::SotnezovGeneticAlgorithm::create_zero_generation(BooleanMatrix::Bo
             int argmax_score = get_maxscore_column(M, covered_rows, new_genes, j);
         }
 
-        population.push_back(Individual(new_genes));
+        population.push_back(BinaryIndividual(new_genes));
         //optimize_covering(M, population[i].genotype);
 
         int f = fitness(M, population[i]);
@@ -132,12 +131,12 @@ void Genetic::SotnezovGeneticAlgorithm::create_zero_generation(BooleanMatrix::Bo
     }
 }
 
-void Genetic::SotnezovGeneticAlgorithm::get_parent_indices(int& p1, int& p2)
+void BCGA::SotnezovBCGA::get_parent_indices(int& p1, int& p2)
 {
     // does nothing but called in base class
 }
 
-Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& parent1, Individual& parent2)
+BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, BinaryIndividual& parent2)
 {
     std::vector<bool> new_genotype;
 
@@ -176,10 +175,10 @@ Genetic::Individual Genetic::SotnezovGeneticAlgorithm::crossover(Individual& par
         }
     }
 
-    return Individual(new_genotype);
+    return BinaryIndividual(new_genotype);
 }
 
-void Genetic::SotnezovGeneticAlgorithm::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter)
+void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter)
 {
     double K = 250.0;
     double C = 0.0005;
@@ -205,7 +204,7 @@ void Genetic::SotnezovGeneticAlgorithm::mutate(BooleanMatrix::BooleanMatrix& M, 
     optimize_covering(M, population[child_idx].genotype);
 }
 
-double Genetic::SotnezovGeneticAlgorithm::fitness(BooleanMatrix::BooleanMatrix& M, Genetic::Individual& individual)
+double BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int ones_counter = 0;
     for(int i = 0; i < individual.size(); i++) {
@@ -216,7 +215,7 @@ double Genetic::SotnezovGeneticAlgorithm::fitness(BooleanMatrix::BooleanMatrix& 
     return ones_counter;
 }
 
-void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
+void BCGA::SotnezovBCGA::selection(int iteration, int verbose)
 {
     int child_score = scores[population_size];
     bool child_in_population = false;

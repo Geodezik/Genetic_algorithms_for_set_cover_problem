@@ -4,7 +4,7 @@
 #include <random>
 #include <numeric>
 
-using namespace Genetic;
+using namespace BCGA;
 
 int main()
 {
@@ -42,7 +42,7 @@ int main()
     }
 
     //int population_size, int extended_population_size, int chromosome_len, double mutation_proba, int max_iter = 100, str task
-    SotnezovGeneticAlgorithm A = SotnezovGeneticAlgorithm(100, 5000);
+    SotnezovBCGA A = SotnezovBCGA(100, 5000);
     // A.print_individuals();
     A.fit(M, 1, false);
     //A.print_solution(M);
