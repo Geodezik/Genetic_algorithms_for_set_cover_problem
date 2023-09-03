@@ -13,8 +13,10 @@ int main()
     double p = 0.05;
     int seed = 317;
 
+    int K = 100;
+    float C = 0.01;
     int population_size = 25;
-    int max_iter = 3;
+    int max_iter = 10;
 
     std::random_device rd{};
     std::mt19937 rng{rd()};
@@ -46,8 +48,7 @@ int main()
         M[i][uid(rng)] = true;
     }
 
-    // int population_size, int max_iter = 100, int seed = -1
-    SotnezovBCGA A = SotnezovBCGA(population_size, max_iter, seed, OutputMode::Silent);
+    SotnezovBCGA A = SotnezovBCGA(population_size, K, C, max_iter, seed, OutputMode::Normal);
     // A.print_individuals();
     A.fit(M);
     //A.print_solution(M);

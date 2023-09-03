@@ -1,7 +1,13 @@
 #include "Genetic.hpp"
 
-BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int max_iter, int seed, OutputMode verbose): BCGA::BaseBCGA(population_size,
-                                 population_size + 1, 1.0, max_iter, seed, verbose) {}
+BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int K, float C, int max_iter, int seed, OutputMode verbose): BCGA::BaseBCGA(population_size,
+                                 population_size + 1, 1.0, max_iter, seed, verbose)
+{
+    if((K <= 0) || (C <= 0.0))
+        throw std::invalid_argument("Wrong value for K or C parameter(s)");
+    this->K = K;
+    this->C = C;
+}
 
 void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
 {
@@ -181,9 +187,6 @@ BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, 
 
 void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter)
 {
-    double K = 250.0;
-    double C = 0.0005;
-    // double T = 250;
     int number_of_mutations = K * (1.0 - 1.0 / (C * parameter + 1.0));
 
     std::cout << "Generation: " << parameter << ", mutations: " << number_of_mutations << std::endl;

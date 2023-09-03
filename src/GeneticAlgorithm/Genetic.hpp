@@ -83,8 +83,11 @@ public:
 class BCGA::SotnezovBCGA: public BCGA::BaseBCGA {
     int scores_sum = 0;
     int unluck_counter = 0;
+
+    int K = 100;
+    float C = 0.01;
 public:
-    SotnezovBCGA(int population_size, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
+    SotnezovBCGA(int population_size, int K = 100, float C = 0.01, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
 
     void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
     std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> columns);
