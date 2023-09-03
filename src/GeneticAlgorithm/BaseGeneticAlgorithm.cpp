@@ -21,6 +21,8 @@ BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, doub
     this->verbose = verbose;
     if(seed >= 0)
         this->rng = std::mt19937(seed);
+    else
+        throw std::invalid_argument("Wrong seed value");
 }
 
 void BCGA::BaseBCGA::print_stats(std::vector<int>& argbest, int iteration)
@@ -99,7 +101,7 @@ void BCGA::BaseBCGA::print_individuals()
 
 void BCGA::BaseBCGA::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
-    if(n > 100)
+    if(n > GlobalSettings::MaxOutputLength)
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
 
     std::cout << "Best individual: " << get_best_individual() << std::endl;

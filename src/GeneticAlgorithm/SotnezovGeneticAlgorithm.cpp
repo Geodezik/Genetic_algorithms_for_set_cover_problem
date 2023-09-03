@@ -31,7 +31,7 @@ void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std:
 
         bool flag = true;
         for(int j = 0; j < m; j++)
-            if(M[j][queue[i]] && (row_scores[j] < 2)) {
+            if(M[j][queue[i]] && (row_scores[j] < GlobalSettings::SotnezovThreshold)) {
                 flag = false;
                 break;
             }
@@ -100,7 +100,7 @@ void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M,
     scores_sum = 0;
     best_score = n;
 
-    double p = 0.5;
+    double p = GlobalSettings::SotnezovInitProbability;
     std::bernoulli_distribution bd(p);
     for(int i = 0; i < population_size; i++) {
         std::vector<bool> new_genes;

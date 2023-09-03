@@ -16,6 +16,9 @@ namespace BCGA {
     class SotnezovBCGA;
     class BinaryIndividual;
     enum class OutputMode {Silent, Normal, Max};
+    namespace GlobalSettings {
+        #include "GlobalSettings.cfg"
+    }
     std::ostream& operator<<(std::ostream& os, const BinaryIndividual& I);
 };
 
@@ -75,7 +78,7 @@ public:
     void print_solution(BooleanMatrix::BooleanMatrix& M);
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
     void analyze_alikeness(int t);
-    void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename="results.txt");
+    void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename = GlobalSettings::default_out_filename);
 
     ~BaseBCGA() {};
 };
