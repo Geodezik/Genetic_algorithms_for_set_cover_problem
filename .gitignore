@@ -30,7 +30,3 @@
 *.exe
 *.out
 *.app
-
-#TeX sources
-*.tex
-images
