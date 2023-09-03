@@ -1,4 +1,4 @@
-#include "Genetic.hpp"
+#include "BCGA.hpp"
 
 BCGA::BinaryIndividual::BinaryIndividual(std::vector<bool>& genotype, bool zero_gen)
 {

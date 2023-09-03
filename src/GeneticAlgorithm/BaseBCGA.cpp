@@ -1,4 +1,4 @@
-#include "Genetic.hpp"
+#include "BCGA.hpp"
 
 template <typename T>
 std::vector<int> BCGA::BaseBCGA::argsort(const std::vector<T> &v) {

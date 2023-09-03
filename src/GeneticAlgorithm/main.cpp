@@ -1,4 +1,4 @@
-#include "Genetic.hpp"
+#include "BCGA.hpp"
 #include "BooleanMatrix.hpp"
 #include <iostream>
 #include <random>

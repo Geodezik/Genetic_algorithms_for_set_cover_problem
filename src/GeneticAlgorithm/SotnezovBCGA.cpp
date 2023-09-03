@@ -1,4 +1,4 @@
-#include "Genetic.hpp"
+#include "BCGA.hpp"
 
 BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int K, float C, int max_iter, int seed, OutputMode verbose): BCGA::BaseBCGA(population_size,
                                  population_size + 1, 1.0, max_iter, seed, verbose)

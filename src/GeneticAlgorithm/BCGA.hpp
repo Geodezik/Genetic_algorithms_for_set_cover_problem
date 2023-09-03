@@ -1,5 +1,5 @@
-#ifndef GENETIC_H
-#define GENETIC_H
+#ifndef BCGA_H
+#define BCGA_H
 
 #include <iostream>
 #include <fstream>
