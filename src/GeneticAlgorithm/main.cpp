@@ -9,8 +9,8 @@ using namespace Genetic;
 int main()
 {
     int m = 1000;
-    int n = 10000;
-    double p = 0.0004;
+    int n = 1000;
+    double p = 0.05;
 
     std::random_device rd{};
     std::mt19937 rng{rd()};

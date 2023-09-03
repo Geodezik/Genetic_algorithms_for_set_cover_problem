@@ -8,6 +8,7 @@
 #include <numeric>
 #include <algorithm>
 #include <ctime>
+#include <stdexcept>
 #include "BooleanMatrix.hpp"
 
 namespace Genetic {
@@ -43,6 +44,8 @@ protected:
     int max_iter;
     int population_size;
     int extended_population_size;
+    int best_score = -1;
+    int best_index = -1;
     double mutation_proba;
 
     int m;
@@ -90,7 +93,6 @@ public:
 };
 
 class Genetic::SotnezovGeneticAlgorithm: public Genetic::BaseGeneticAlgorithm {
-    int best_score = 0;
     int scores_sum = 0;
     int unluck_counter = 0;
 public:

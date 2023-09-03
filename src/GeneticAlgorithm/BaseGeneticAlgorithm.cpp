@@ -45,9 +45,8 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
     create_zero_generation(M, n);
 
     scores.clear();
-    for(int j = 0; j < population_size; j++) {
+    for(int j = 0; j < population_size; j++)
         scores.push_back(fitness(M, population[j]));
-    }
 
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
@@ -66,9 +65,8 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
         mutate(M, mutation_proba, i);
 
         //Get scores for new individuals
-        for(int j = population_size; j < extended_population_size; j++) {
+        for(int j = population_size; j < extended_population_size; j++)
             scores[j] = fitness(M, population[j]);
-        }
 
         //Selection
         selection(i, verbose);
@@ -85,21 +83,21 @@ void Genetic::BaseGeneticAlgorithm::fit(BooleanMatrix::BooleanMatrix& M, int ver
 
 Genetic::Individual& Genetic::BaseGeneticAlgorithm::get_best_individual()
 {
-    return population[0];
+    if ((best_index >= population_size) || (best_index == -1))
+        throw std::out_of_range("Solution index (best_index) either wasn't defined or out of range");
+    return population[best_index];
 }
 
 void Genetic::BaseGeneticAlgorithm::print_individuals()
 {
-    for(int i =0; i < population_size; i++) {
+    for(int i = 0; i < population_size; i++)
         std::cout << population[i] << std::endl;
-    }
 }
 
 void Genetic::BaseGeneticAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
-    if(n > 100) {
+    if(n > 100)
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
-    }
 
     std::cout << "Best individual: " << get_best_individual() << std::endl;
     std::cout << "Coverage: " << std::endl;
@@ -124,11 +122,10 @@ void Genetic::BaseGeneticAlgorithm::analyze_solution(BooleanMatrix::BooleanMatri
         int f = fitness(M, population[j]);
         std::cout << j + 1 << ") ";
         std::cout << "Fitness: " << f << ',';
-        if(f < n + 1) {
+        if(f < n + 1)
             std::cout << " columns not included: " << n - f << std::endl;
-        } else {
+        else
             std::cout << " not a covering" << std::endl;
-        }
     }
 }
 
@@ -149,9 +146,8 @@ void Genetic::BaseGeneticAlgorithm::analyze_alikeness(int t)
                     break;
                 }
             }
-            if(flag) {
+            if(flag)
                 example = j;
-            }
             alike_counter += flag;
         }
 
