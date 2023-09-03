@@ -125,8 +125,10 @@ void Genetic::SotnezovGeneticAlgorithm::create_zero_generation(BooleanMatrix::Bo
 
         int f = fitness(M, population[i]);
         scores_sum += f;
-        if(f < best_score)
+        if(f < best_score) {
             best_score = f;
+            best_index = i;
+        }
     }
 }
 
@@ -217,26 +219,25 @@ double Genetic::SotnezovGeneticAlgorithm::fitness(BooleanMatrix::BooleanMatrix& 
 void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
 {
     int child_score = scores[population_size];
-
     bool child_in_population = false;
-    for(int i = 0; i < population_size; i++) {
-        bool flag = true;
-        for(int j = 0; j < n; j++) {
-            if(population[population_size].genotype[j] != population[i].genotype[j]) {
-                flag = false;
-                break;
-            }
-        }
-        if(flag) {
-            child_in_population = true;
-            break;
-        }
-    }
-
     bool hit_by_child = (child_score < best_score);
     if(hit_by_child) {
         //std::cout << "New best score " << child_score << std::endl;
         best_score = child_score;
+        child_in_population = true;
+    } else {
+        for(int i = 0; i < population_size; i++) {
+            bool flag = true;
+            for(int j = 0; j < n; j++)
+                if(population[population_size].genotype[j] != population[i].genotype[j]) {
+                    flag = false;
+                    break;
+                }
+            if(flag) {
+                child_in_population = true;
+                break;
+            }
+        }
     }
 
     if(verbose == 1) {
@@ -246,7 +247,15 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
         std::cout << ", already in this population: " << child_in_population << ", hit by child: " << hit_by_child;
     }
 
-    if(child_in_population) {
+    // find all the worse individuals indices
+    std::vector<int> worse;
+    for(int i = 0; i < population_size; i++)
+        if(child_score < scores[i])
+            worse.push_back(i);
+
+    // track cases when child should NOT be included
+    bool bad_child = (worse.size() == 0);
+    if(child_in_population || bad_child) {
         if(verbose == 2)
             std::cout << ", replaced: " << "-" << ", child score: " << child_score << std::endl;
         unluck_counter++;
@@ -259,29 +268,14 @@ void Genetic::SotnezovGeneticAlgorithm::selection(int iteration, int verbose)
         return;
     }
 
-    std::vector<int> worse;
-    for(int i = 0; i < population_size; i++) {
-        if(child_score < scores[i])
-            worse.push_back(i);
-    }
-
-    if(!worse.size()) {
-        if(verbose == 2)
-            std::cout << ", replaced: " << "-" << ", child score: " << child_score << std::endl;
-        unluck_counter++;
-        if(unluck_counter >= 10) {
-            unluck_counter = 0;
-            // recreate half population ?
-            
-        }
-        return;
-    }
-
+    // replace with % in future!
     std::uniform_int_distribution<> uid(0, worse.size() - 1);
     int random_individual = uid(rng);
     scores_sum -= (scores[worse[random_individual]] - child_score);
     scores[worse[random_individual]] = child_score;
     population[worse[random_individual]] = population[population_size];
+    if(hit_by_child)
+        best_index = worse[random_individual];
     if(verbose == 2)
         std::cout << ", replaced: " << worse[random_individual] << ", child score: " << child_score << std::endl;
     population.pop_back();
