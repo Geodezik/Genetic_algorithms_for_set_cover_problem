@@ -185,7 +185,6 @@ void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation
         population[child_idx].genotype[random_gen] = !population[child_idx].genotype[random_gen];
     }
 
-    //reCOVERING (haha)
     std::vector<bool> covered_rows = get_covered_rows(M, population[child_idx].genotype);
     for(int j = 0; j < covered_rows.size(); j++) {
         if(covered_rows[j])
