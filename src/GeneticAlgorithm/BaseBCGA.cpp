@@ -46,6 +46,8 @@ void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M) {
     this->m = M.get_m();
     this->n = M.get_n();
 
+    check_compatibility();
+
     population.clear();
     create_zero_generation(M, n);
 

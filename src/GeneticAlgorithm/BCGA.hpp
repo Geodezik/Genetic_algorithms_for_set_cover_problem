@@ -81,6 +81,7 @@ public:
     virtual void selection(int iteration) = 0;
 
     BinaryIndividual& get_best_individual();
+    virtual void check_compatibility() {};
     void create_matrix(int m, int n);
     void print_individuals();
     void print_solution(BooleanMatrix::BooleanMatrix& M);
@@ -122,6 +123,7 @@ protected:
 public:
     EncodingSotnezovBCGA(int population_size, std::vector<int> features, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
                          int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
+    void check_compatibility();
 };
 
 #endif
