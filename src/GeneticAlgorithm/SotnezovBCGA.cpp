@@ -11,7 +11,7 @@ BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int K, float C, int max_it
 
 void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
 {
-    int row_scores[m] = {};
+    std::vector<int> row_scores(m);
     std::vector<int> column_scores(n);
     for(int i = 0; i < m; i++)
         for(int j = 0; j < n; j++)
@@ -48,14 +48,14 @@ void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std:
     }
 }
 
-std::vector<bool> BCGA::SotnezovBCGA::get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> columns)
+std::vector<bool> BCGA::SotnezovBCGA::get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> &columns)
 {
     std::vector<bool> covered_rows;
     for(int i = 0; i < m; i++) {
-        bool flag = true;
+        bool flag = false;
         for(int j = 0; j < n; j++)
             if(M[i][j] & columns[j]) {
-                flag = false;
+                flag = true;
                 break;
             }
         covered_rows.push_back(flag);
@@ -64,12 +64,12 @@ std::vector<bool> BCGA::SotnezovBCGA::get_covered_rows(BooleanMatrix::BooleanMat
     return covered_rows;
 }
 
-int BCGA::SotnezovBCGA::get_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row)
+void BCGA::SotnezovBCGA::add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row)
 {
     int max_score = 0;
     int argmax_score = 0;
     for(int i = 0; i < n; i++) {
-        //i doesn't cover this row
+        //i doesn't cover this row or already added
         if(!M[row][i] || columns[i])
             continue;
         int score = 1;
@@ -88,8 +88,17 @@ int BCGA::SotnezovBCGA::get_maxscore_column(BooleanMatrix::BooleanMatrix& M, std
 
     //!!!
     columns[argmax_score] = true;
+}
 
-    return argmax_score;
+void BCGA::SotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
+{
+    std::vector<bool> covered_rows = get_covered_rows(M, columns);
+    for(int j = 0; j < covered_rows.size(); j++) {
+        if(covered_rows[j])
+            continue;
+        //cover this and many others (works with side effect)
+        add_maxscore_column(M, covered_rows, columns, j);
+    }
 }
 
 void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
@@ -106,14 +115,8 @@ void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M,
         std::vector<bool> new_genes;
         for(int j = 0; j < genotype_len; j++)
             new_genes.push_back(bd(rng));
-        std::vector<bool> covered_rows = get_covered_rows(M, new_genes);
-        for(int j = 0; j < covered_rows.size(); j++) {
-            if(covered_rows[j])
-                continue;
-            //cover this and many (works with side effect)
-            int argmax_score = get_maxscore_column(M, covered_rows, new_genes, j);
-        }
 
+        restore_solution(M, new_genes);
         population.push_back(BinaryIndividual(new_genes));
         //optimize_covering(M, population[i].genotype);
 
@@ -151,7 +154,6 @@ BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, 
     std::discrete_distribution<> distr(probs.begin(), probs.end());
     int p1 = distr(rng);
     int p2 = distr(rng);
-    // std::cout << "Parents " << p1 << ", " << p2 << " with probs " << probs[p1] << ", " << probs[p2] << std::endl;
     int f1 = scores[p1] - best_score + 1;
     int f2 = scores[p2] - best_score + 1;
     double p = f2 / (f1 + f2);
@@ -176,21 +178,16 @@ void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation
 {
     int number_of_mutations = K * (1.0 - 1.0 / (C * parameter + 1.0));
 
-    std::cout << "Generation: " << parameter << ", mutations: " << number_of_mutations << std::endl;
     int genotype_len = population[0].size();
     int child_idx = population_size;
+
     for(int mut_iter = 0; mut_iter < number_of_mutations; mut_iter++) {
         std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
         int random_gen = genes_d(rng);
         population[child_idx].genotype[random_gen] = !population[child_idx].genotype[random_gen];
     }
 
-    std::vector<bool> covered_rows = get_covered_rows(M, population[child_idx].genotype);
-    for(int j = 0; j < covered_rows.size(); j++) {
-        if(covered_rows[j])
-            continue;
-        int argmax_score = get_maxscore_column(M, covered_rows, population[child_idx].genotype, j);
-    }
+    restore_solution(M, population[child_idx].genotype);
     optimize_covering(M, population[child_idx].genotype);
 }
 

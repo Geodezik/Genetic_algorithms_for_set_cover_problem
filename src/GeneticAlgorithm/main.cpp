@@ -8,15 +8,15 @@ using namespace BCGA;
 
 int main()
 {
-    int m = 1000;
-    int n = 1000;
-    double p = 0.05;
+    int m = 10;
+    int n = 10;
+    double p = 0.002;
     int seed = 317;
 
-    int K = 100;
-    float C = 0.01;
-    int population_size = 25;
-    int max_iter = 250;
+    int K = 8;
+    float C = 1.0;
+    int population_size = 1;
+    int max_iter = 150;
 
     std::random_device rd{};
     std::mt19937 rng{rd()};
@@ -24,7 +24,6 @@ int main()
     std::bernoulli_distribution bd(p);
     std::uniform_int_distribution<> uid(1, n - 1);
 
-    /*
     bool Matrix[m][n] = {
         {0, 1, 1, 1, 1, 0, 1, 0, 1, 0},
         {1, 0, 1, 0, 0, 0, 1, 0, 1, 0},
@@ -37,22 +36,21 @@ int main()
         {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 1, 0, 0}
     };
-    */
 
     BooleanMatrix::BooleanMatrix M(m, n);
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < n; j++) {
-            M[i][j] = static_cast<bool> (bd(rng));
-            //M[i][j] = Matrix[i][j];
+            //M[i][j] = static_cast<bool> (bd(rng));
+            M[i][j] = Matrix[i][j];
         }
-        M[i][uid(rng)] = true;
+        //M[i][uid(rng)] = true;
     }
 
-    SotnezovBCGA A = SotnezovBCGA(population_size, K, C, max_iter, seed, OutputMode::Normal);
-    // A.print_individuals();
+    std::vector<int> features = {1, 1, 1, 1, 1, 2, 2, 2, 2, 3};
+
+    EncodingSotnezovBCGA A = EncodingSotnezovBCGA(population_size, features, Fitness::CovLen, K, C, max_iter, seed, OutputMode::Max);
     A.fit(M);
-    //A.print_solution(M);
-    //A.print_fit_stats(M);
+    A.print_solution(M);
 
     return 0;
 }

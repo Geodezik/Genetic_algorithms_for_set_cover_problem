@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <map>
 #include <random>
 #include <numeric>
 #include <algorithm>
@@ -14,8 +15,11 @@
 namespace BCGA {
     class BaseBCGA;
     class SotnezovBCGA;
+    class EncodingSotnezovBCGA;
     class BinaryIndividual;
     enum class OutputMode {Silent, Normal, Max};
+    enum class Fitness {CovLen, MaxBinsNum};
+
     namespace GlobalSettings {
         #include "GlobalSettings.cfg"
     }
@@ -23,6 +27,7 @@ namespace BCGA {
 };
 
 class BCGA::BinaryIndividual {
+protected:
     bool zero_gen;
 public:
     std::vector<bool> genotype;
@@ -49,8 +54,8 @@ protected:
     int best_index = -1;
     double mutation_proba;
 
-    int m;
-    int n;
+    //int m;
+    //int n;
 
     double fit_time;
     OutputMode verbose = OutputMode::Normal;
@@ -59,6 +64,9 @@ protected:
     std::vector<int> argsort(const std::vector<T> &v);
 
 public:
+    int m;
+    int n;
+
     BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100,
              int seed = -1, OutputMode verbose = OutputMode::Normal);
     void fit(BooleanMatrix::BooleanMatrix& M);
@@ -84,6 +92,7 @@ public:
 };
 
 class BCGA::SotnezovBCGA: public BCGA::BaseBCGA {
+protected:
     int scores_sum = 0;
     int unluck_counter = 0;
 
@@ -93,8 +102,9 @@ public:
     SotnezovBCGA(int population_size, int K = 100, float C = 0.01, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
 
     void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> columns);
-    int get_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row);
+    std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    void add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row);
 
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
     void get_parent_indices(int& p1, int& p2);
@@ -102,6 +112,16 @@ public:
     void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter);
     double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     void selection(int iteration);
+};
+
+class BCGA::EncodingSotnezovBCGA: public BCGA::SotnezovBCGA {
+protected:
+    Fitness fit_function = Fitness::CovLen;
+    std::vector<int> features;
+    std::map<int, int> group_counters;
+public:
+    EncodingSotnezovBCGA(int population_size, std::vector<int> features, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
+                         int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 };
 
 #endif
