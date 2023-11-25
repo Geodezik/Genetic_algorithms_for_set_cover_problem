@@ -121,9 +121,13 @@ protected:
     std::vector<int> features;
     std::map<int, int> group_counters;
 public:
-    EncodingSotnezovBCGA(int population_size, std::vector<int> features, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
+    EncodingSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
                          int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
     void check_compatibility();
+
+    double covlen_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    double maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
 };
 
 #endif

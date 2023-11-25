@@ -46,9 +46,9 @@ int main()
         //M[i][uid(rng)] = true;
     }
 
-    std::vector<int> features = {1, 1, 1, 1, 1, 2, 2, 2, 2, 3};
+    std::vector<int> groups_idx = {0, 5, 9};
 
-    EncodingSotnezovBCGA A = EncodingSotnezovBCGA(population_size, features, Fitness::CovLen, K, C, max_iter, seed, OutputMode::Max);
+    EncodingSotnezovBCGA A = EncodingSotnezovBCGA(population_size, groups_idx, Fitness::CovLen, K, C, max_iter, seed, OutputMode::Max);
     A.fit(M);
     A.print_solution(M);
 
