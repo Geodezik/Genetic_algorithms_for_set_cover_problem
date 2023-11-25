@@ -118,8 +118,8 @@ public:
 class BCGA::EncodingSotnezovBCGA: public BCGA::SotnezovBCGA {
 protected:
     Fitness fit_function = Fitness::CovLen;
-    std::vector<int> features;
-    std::map<int, int> group_counters;
+    std::vector<int> groups_idx;
+    std::vector<int> group_counters;
 public:
     EncodingSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
                          int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
