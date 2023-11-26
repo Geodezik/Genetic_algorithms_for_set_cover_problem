@@ -54,19 +54,11 @@ protected:
     int best_index = -1;
     double mutation_proba;
 
-    //int m;
-    //int n;
-
-    double fit_time;
-    OutputMode verbose = OutputMode::Normal;
-public:
     int m;
     int n;
 
-    BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100,
-             int seed = -1, OutputMode verbose = OutputMode::Normal);
-    void fit(BooleanMatrix::BooleanMatrix& M);
-    void print_stats(std::vector<int>& argbest, int iteration);
+    double fit_time;
+    OutputMode verbose = OutputMode::Normal;
 
     // TO IMPLEMENT
     virtual void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len) = 0;
@@ -76,14 +68,20 @@ public:
     virtual int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual) = 0;
     virtual void selection(int iteration) = 0;
 
+    virtual void check_compatibility() {};
+    virtual void analyze_solution(BooleanMatrix::BooleanMatrix& M) {};
+public:
+    BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100,
+             int seed = -1, OutputMode verbose = OutputMode::Normal);
+
+    void fit(BooleanMatrix::BooleanMatrix& M);
+    void print_stats(std::vector<int>& argbest, int iteration);
+
     BinaryIndividual& get_best_individual();
     void print_individuals();
     void print_solution(BooleanMatrix::BooleanMatrix& M);
     void analyze_alikeness(int t);
     void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename = GlobalSettings::default_out_filename);
-
-    virtual void check_compatibility() {};
-    virtual void analyze_solution(BooleanMatrix::BooleanMatrix& M) {};
 
     ~BaseBCGA() {};
 };
@@ -98,13 +96,6 @@ protected:
 
     template <typename T>
     std::vector<int> argsort(const std::vector<T> &v);
-public:
-    SotnezovBCGA(int population_size, int K = 100, float C = 0.01, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
-
-    virtual void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    virtual std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    virtual void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    virtual void add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row, int from, int to);
 
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
     void get_parent_indices(int& p1, int& p2);
@@ -112,6 +103,13 @@ public:
     void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter);
     int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     void selection(int iteration);
+
+    virtual void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    virtual std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    virtual void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    virtual void add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row, int from, int to);
+public:
+    SotnezovBCGA(int population_size, int K = 100, float C = 0.01, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
 };
 
 class BCGA::EncodingSotnezovBCGA: public BCGA::SotnezovBCGA {
@@ -125,9 +123,7 @@ protected:
     std::vector<int> conditional_argsort(const std::vector<T> &v, const std::vector<T> &c);
     template <typename T>
     std::vector<int> special_conditional_argsort(const std::vector<T> &v, const std::vector<T> &a, const std::vector<T> &b);
-public:
-    EncodingSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
-                         int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
+
     void check_compatibility();
     void fill_counters(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
 
@@ -138,6 +134,9 @@ public:
     int maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     int mixed_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+public:
+    EncodingSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
+                         int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
 };
