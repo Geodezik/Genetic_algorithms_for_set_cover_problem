@@ -20,6 +20,7 @@ void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std:
                 column_scores[j]++;
             }
 
+    // iterate through columns (from worst to best), exclude if can
     std::vector<int> queue = argsort(column_scores);
     for(int i = 0; i < n; i++) {
         //zero rows covered or not in covering
@@ -64,11 +65,11 @@ std::vector<bool> BCGA::SotnezovBCGA::get_covered_rows(BooleanMatrix::BooleanMat
     return covered_rows;
 }
 
-void BCGA::SotnezovBCGA::add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row)
+void BCGA::SotnezovBCGA::add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row, int from, int to)
 {
-    int max_score = 0;
-    int argmax_score = 0;
-    for(int i = 0; i < n; i++) {
+    int max_score = -1;
+    int argmax_score = from;
+    for(int i = from; i < to; i++) {
         //i doesn't cover this row or already added
         if(!M[row][i] || columns[i])
             continue;
@@ -97,7 +98,7 @@ void BCGA::SotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& M, std::
         if(covered_rows[j])
             continue;
         //cover this and many others (works with side effect)
-        add_maxscore_column(M, covered_rows, columns, j);
+        add_maxscore_column(M, covered_rows, columns, j, 0, n);
     }
 }
 
@@ -180,9 +181,9 @@ void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation
 
     int genotype_len = population[0].size();
     int child_idx = population_size;
+    std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
 
     for(int mut_iter = 0; mut_iter < number_of_mutations; mut_iter++) {
-        std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
         int random_gen = genes_d(rng);
         population[child_idx].genotype[random_gen] = !population[child_idx].genotype[random_gen];
     }

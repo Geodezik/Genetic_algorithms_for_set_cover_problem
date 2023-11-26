@@ -62,6 +62,10 @@ protected:
 
     template <typename T>
     std::vector<int> argsort(const std::vector<T> &v);
+    template <typename T>
+    std::vector<int> conditional_argsort(const std::vector<T> &v, const std::vector<T> &c, int &counter_of_cases);
+    template <typename T>
+    std::vector<int> special_conditional_argsort(const std::vector<T> &v, const std::vector<T> &a, const std::vector<T> &b);
 
 public:
     int m;
@@ -102,10 +106,10 @@ protected:
 public:
     SotnezovBCGA(int population_size, int K = 100, float C = 0.01, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
 
-    void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    void add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row);
+    virtual void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    virtual std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    virtual void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    virtual void add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row, int from, int to);
 
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
     void get_parent_indices(int& p1, int& p2);
@@ -120,11 +124,15 @@ protected:
     Fitness fit_function = Fitness::CovLen;
     std::vector<int> groups_idx;
     std::vector<int> group_counters;
+    std::vector<int> columns_groups;
 public:
     EncodingSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
                          int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
     void check_compatibility();
+    void fill_counters(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
 
+    void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
     double covlen_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     double maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);

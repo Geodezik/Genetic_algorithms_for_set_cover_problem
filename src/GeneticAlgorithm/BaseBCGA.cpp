@@ -12,6 +12,30 @@ std::vector<int> BCGA::BaseBCGA::argsort(const std::vector<T> &v) {
     return idx;
 }
 
+template <typename T>
+std::vector<int> BCGA::BaseBCGA::conditional_argsort(const std::vector<T> &v, const std::vector<T> &c, int &counter_of_cases) {
+    //Argsort, but for equal values: bigger c => earlier
+    std::vector<int> idx(v.size());
+    std::iota(idx.begin(), idx.end(), 0);
+
+    std::stable_sort(idx.begin(), idx.end(),
+        [&v, &c, &counter_of_cases](int i1, int i2) {if((v[i1] == v[i2]) && (c[i1] > c[i2])) counter_of_cases++; return (v[i1] < v[i2]) || ((v[i1] == v[i2]) && (c[i1] > c[i2]));});
+
+    return idx;
+}
+
+template <typename T>
+std::vector<int> BCGA::BaseBCGA::special_conditional_argsort(const std::vector<T> &v, const std::vector<T> &a, const std::vector<T> &b) {
+    //Argsort, but for equal values: bigger c => earlier
+    std::vector<int> idx(v.size());
+    std::iota(idx.begin(), idx.end(), 0);
+
+    std::stable_sort(idx.begin(), idx.end(),
+        [&v, &a, &b](int i1, int i2) {return (v[i1] < v[i2]) || ((v[i1] == v[i2]) && (b[a[i1]] > b[a[i2]]));});
+
+    return idx;
+}
+
 BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter, int seed, OutputMode verbose)
 {
     this->population_size = population_size;
