@@ -15,7 +15,7 @@
 namespace BCGA {
     class BaseBCGA;
     class SotnezovBCGA;
-    class EncodingSotnezovBCGA;
+    class EncSotnezovBCGA;
     class BinaryIndividual;
 
     enum class OutputMode {Silent, Normal, Max};
@@ -114,7 +114,7 @@ public:
     SotnezovBCGA(int population_size, int K = 100, float C = 0.01, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
 };
 
-class BCGA::EncodingSotnezovBCGA: public BCGA::SotnezovBCGA {
+class BCGA::EncSotnezovBCGA: public BCGA::SotnezovBCGA {
 protected:
     Fitness fit_function = Fitness::CovLen;
     std::vector<int> groups_idx;
@@ -137,7 +137,7 @@ protected:
     int mixed_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
 public:
-    EncodingSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
+    EncSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
                          int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
