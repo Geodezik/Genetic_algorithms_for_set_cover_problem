@@ -1,5 +1,17 @@
 #include "BCGA.hpp"
 
+template <typename T>
+std::vector<int> BCGA::SotnezovBCGA::argsort(const std::vector<T> &v) {
+    //Argsort for any type of elem-comparable vectors
+    std::vector<int> idx(v.size());
+    std::iota(idx.begin(), idx.end(), 0);
+
+    std::stable_sort(idx.begin(), idx.end(),
+        [&v](int i1, int i2) {return v[i1] < v[i2];});
+
+    return idx;
+}
+
 BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int K, float C, int max_iter, int seed, OutputMode verbose): BCGA::BaseBCGA(population_size,
                                  population_size + 1, 1.0, max_iter, seed, verbose)
 {
@@ -11,6 +23,7 @@ BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int K, float C, int max_it
 
 void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
 {
+    // possible upgrade: sort not all the indices but covering indices
     std::vector<int> row_scores(m);
     std::vector<int> column_scores(n);
     for(int i = 0; i < m; i++)
@@ -196,8 +209,7 @@ double BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::Binary
 {
     int ones_counter = 0;
     for(int i = 0; i < individual.size(); i++)
-        if(individual.genotype[i])
-            ones_counter++;
+        ones_counter += individual.genotype[i];
 
     return ones_counter;
 }

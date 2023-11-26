@@ -8,15 +8,15 @@ using namespace BCGA;
 
 int main()
 {
-    int m = 3500;
-    int n = 3000;
-    double p = 0.01;
+    int m = 1000;
+    int n = 1500;
+    double p = 0.0025;
     int seed = 417;
 
-    int K = 150;
+    int K = 200;
     float C = 0.001;
-    int population_size = 50;
-    int max_iter = 1500;
+    int population_size = 5;
+    int max_iter = 2500;
 
     std::random_device rd{};
     std::mt19937 rng{rd()};
@@ -48,10 +48,10 @@ int main()
         M[i][uid(rng)] = true;
     }
 
-    std::vector<int> groups_idx = {0, 748, 1001, 1356, 1700, 1866, 2111, 2789, 2894};
+    std::vector<int> groups_idx = {0, 22, 74, 122, 198, 244, 399, 524, 666, 680, 722, 740};
 
     //SotnezovBCGA A = SotnezovBCGA(population_size, K, C, max_iter, seed, OutputMode::Normal);
-    EncodingSotnezovBCGA A = EncodingSotnezovBCGA(population_size, groups_idx, Fitness::MaxBinsNum, K, C, max_iter, seed, OutputMode::Normal);
+    EncodingSotnezovBCGA A = EncodingSotnezovBCGA(population_size, groups_idx, Fitness::MaxBinsNum, K, C, max_iter, seed, OutputMode::Max);
     A.fit(M);
     //A.print_solution(M);
 

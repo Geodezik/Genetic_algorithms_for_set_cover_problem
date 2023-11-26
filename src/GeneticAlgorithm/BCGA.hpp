@@ -59,14 +59,6 @@ protected:
 
     double fit_time;
     OutputMode verbose = OutputMode::Normal;
-
-    template <typename T>
-    std::vector<int> argsort(const std::vector<T> &v);
-    template <typename T>
-    std::vector<int> conditional_argsort(const std::vector<T> &v, const std::vector<T> &c, int &counter_of_cases);
-    template <typename T>
-    std::vector<int> special_conditional_argsort(const std::vector<T> &v, const std::vector<T> &a, const std::vector<T> &b);
-
 public:
     int m;
     int n;
@@ -103,6 +95,9 @@ protected:
 
     int K = 100;
     float C = 0.01;
+
+    template <typename T>
+    std::vector<int> argsort(const std::vector<T> &v);
 public:
     SotnezovBCGA(int population_size, int K = 100, float C = 0.01, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
 
@@ -125,12 +120,18 @@ protected:
     std::vector<int> groups_idx;
     std::vector<int> group_counters;
     std::vector<int> columns_groups;
+
+    template <typename T>
+    std::vector<int> conditional_argsort(const std::vector<T> &v, const std::vector<T> &c);
+    template <typename T>
+    std::vector<int> special_conditional_argsort(const std::vector<T> &v, const std::vector<T> &a, const std::vector<T> &b);
 public:
     EncodingSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, float C = 0.01,
                          int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
     void check_compatibility();
     void fill_counters(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
 
+    std::vector<int> build_decreasing_counters(std::vector<bool>& columns, std::vector<int>& columns_argsort);
     void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
     void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
     double covlen_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);

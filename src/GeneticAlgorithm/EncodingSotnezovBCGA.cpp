@@ -1,5 +1,29 @@
 #include "BCGA.hpp"
 
+template <typename T>
+std::vector<int> BCGA::EncodingSotnezovBCGA::conditional_argsort(const std::vector<T> &v, const std::vector<T> &c) {
+    //Argsort, but for equal values: bigger c => earlier
+    std::vector<int> idx(v.size());
+    std::iota(idx.begin(), idx.end(), 0);
+
+    std::stable_sort(idx.begin(), idx.end(),
+        [&v, &c](int i1, int i2) {return (v[i1] < v[i2]) || ((v[i1] == v[i2]) && (c[i1] > c[i2]));});
+
+    return idx;
+}
+
+template <typename T>
+std::vector<int> BCGA::EncodingSotnezovBCGA::special_conditional_argsort(const std::vector<T> &v, const std::vector<T> &a, const std::vector<T> &b) {
+    //Argsort, but for equal values: bigger c => earlier
+    std::vector<int> idx(v.size());
+    std::iota(idx.begin(), idx.end(), 0);
+
+    std::stable_sort(idx.begin(), idx.end(),
+        [&v, &a, &b](int i1, int i2) {return (v[i1] < v[i2]) || ((v[i1] == v[i2]) && (b[a[i1]] > b[a[i2]]));});
+
+    return idx;
+}
+
 BCGA::EncodingSotnezovBCGA::EncodingSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize, int K, float C, int max_iter, int seed, OutputMode verbose): BCGA::SotnezovBCGA(
                                                  population_size, K, C, max_iter, seed, verbose)
 {
@@ -42,8 +66,23 @@ void BCGA::EncodingSotnezovBCGA::fill_counters(BooleanMatrix::BooleanMatrix& M, 
             group_counters[group] += columns[j];
 }
 
+std::vector<int> BCGA::EncodingSotnezovBCGA::build_decreasing_counters(std::vector<bool>& columns, std::vector<int>& columns_argsort)
+{
+    std::vector<int> group_counters_copy = group_counters;
+    std::vector<int> decreasing_group_counters(n);
+
+    for(auto idx: columns_argsort) {
+        group_counters_copy[columns_groups[idx]] -= columns[idx];
+        decreasing_group_counters[idx] = group_counters_copy[columns_groups[idx]];
+    }
+    
+    return decreasing_group_counters;
+}
+
 void BCGA::EncodingSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
 {
+    fill_counters(M, columns);
+
     std::vector<int> row_scores(m);
     std::vector<int> column_scores(n);
     for(int i = 0; i < m; i++)
@@ -55,17 +94,20 @@ void BCGA::EncodingSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix&
 
     // iterate through columns (from worst to best), exclude if can
     std::vector<int> queue;
+    std::vector<int> decreasing_group_counters;
 
     switch(fit_function) {
-    case Fitness::CovLen:
-        queue = argsort(column_scores);
-        break;
-    case Fitness::MaxBinsNum:
-        queue = special_conditional_argsort(column_scores, columns_groups, group_counters);
-        //queue = argsort(column_scores);
-        break;
-    default:
-        throw std::invalid_argument("Unknown fitness funtion in optimization call");
+        case Fitness::CovLen:
+            queue = argsort(column_scores);
+            break;
+        case Fitness::MaxBinsNum:
+            //queue = special_conditional_argsort(column_scores, columns_groups, group_counters);
+            queue = argsort(column_scores);
+            decreasing_group_counters = build_decreasing_counters(columns, queue);
+            queue = conditional_argsort(column_scores, decreasing_group_counters);
+            break;
+        default:
+            throw std::invalid_argument("Unknown fitness function in optimization call");
     }
 
     for(int i = 0; i < n; i++) {
@@ -125,16 +167,13 @@ void BCGA::EncodingSotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& 
             continue;
         add_maxscore_column(M, covered_rows, columns, i, 0, n);
     }
-
-    fill_counters(M, columns);
 }
 
 double BCGA::EncodingSotnezovBCGA::covlen_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int ones_counter = 0;
     for(int i = 0; i < individual.size(); i++)
-        if(individual.genotype[i])
-            ones_counter++;
+        ones_counter += individual.genotype[i];
     if(ones_counter < groups_idx.size() - 1)
         throw "A bug was detected";
     return ones_counter;
@@ -158,9 +197,9 @@ double BCGA::EncodingSotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA
     case Fitness::MaxBinsNum:
         return maxbinsnum_fitness(M, individual);
     default:
-        throw std::invalid_argument("Unknown fitness funtion in fitness call");
+        throw std::invalid_argument("Unknown fitness function in fitness call");
     }
 
-    throw std::invalid_argument("Unknown fitness funtion in fitness call");
+    throw std::invalid_argument("Unknown fitness function in fitness call");
     return 0;
 }
