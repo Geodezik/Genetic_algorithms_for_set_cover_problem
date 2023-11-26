@@ -101,6 +101,7 @@ void BCGA::EncodingSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix&
             queue = argsort(column_scores);
             break;
         case Fitness::MaxBinsNum:
+        case Fitness::Mixed:
             //queue = special_conditional_argsort(column_scores, columns_groups, group_counters);
             queue = argsort(column_scores);
             decreasing_group_counters = build_decreasing_counters(columns, queue);
@@ -169,7 +170,7 @@ void BCGA::EncodingSotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& 
     }
 }
 
-double BCGA::EncodingSotnezovBCGA::covlen_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+int BCGA::EncodingSotnezovBCGA::covlen_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int ones_counter = 0;
     for(int i = 0; i < individual.size(); i++)
@@ -179,7 +180,7 @@ double BCGA::EncodingSotnezovBCGA::covlen_fitness(BooleanMatrix::BooleanMatrix& 
     return ones_counter;
 }
 
-double BCGA::EncodingSotnezovBCGA::maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+int BCGA::EncodingSotnezovBCGA::maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     fill_counters(M, individual.genotype);
     int max_bin_num = 0;
@@ -189,17 +190,54 @@ double BCGA::EncodingSotnezovBCGA::maxbinsnum_fitness(BooleanMatrix::BooleanMatr
     return max_bin_num + 1;
 }
 
-double BCGA::EncodingSotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+int BCGA::EncodingSotnezovBCGA::mixed_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+{
+    int maxbinsnum = maxbinsnum_fitness(M, individual);
+    int covlen = covlen_fitness(M, individual);
+    return maxbinsnum + covlen / (groups_idx.size() - 1);
+}
+
+int BCGA::EncodingSotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     switch(fit_function) {
-    case Fitness::CovLen:
-        return covlen_fitness(M, individual);
-    case Fitness::MaxBinsNum:
-        return maxbinsnum_fitness(M, individual);
-    default:
-        throw std::invalid_argument("Unknown fitness function in fitness call");
+        case Fitness::CovLen:
+            return covlen_fitness(M, individual);
+        case Fitness::MaxBinsNum:
+            return maxbinsnum_fitness(M, individual);
+        case Fitness::Mixed:
+            return mixed_fitness(M, individual);
+        default:
+            throw std::invalid_argument("Unknown fitness function in fitness call");
     }
 
     throw std::invalid_argument("Unknown fitness function in fitness call");
     return 0;
+}
+
+void BCGA::EncodingSotnezovBCGA::analyze_solution(BooleanMatrix::BooleanMatrix& M)
+{
+    int best_covlen = n;
+    int best_maxbinsnum = n;
+    int best_mixed = n;
+
+    for(auto individual: population) {
+        int score = n;
+        score = covlen_fitness(M, individual);
+        best_covlen = (best_covlen > score) ? score : best_covlen;
+        score = maxbinsnum_fitness(M, individual);
+        best_maxbinsnum = (best_maxbinsnum > score) ? score : best_maxbinsnum;
+    }
+
+    switch(verbose) {
+        case OutputMode::Silent:
+            break;
+        case OutputMode::Normal:
+            std::cout << best_covlen << ' ' << best_maxbinsnum << std::endl;
+            break;
+        case OutputMode::Max:
+            std::cout << "Best CovLen: " << best_covlen << std::endl;
+            std::cout << "Best MaxBinsNum " << best_maxbinsnum << std::endl;
+            std::cout << std::endl;
+            break;
+    }
 }

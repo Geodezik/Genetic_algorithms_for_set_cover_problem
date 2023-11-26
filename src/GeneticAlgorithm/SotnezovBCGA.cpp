@@ -205,7 +205,7 @@ void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation
     optimize_covering(M, population[child_idx].genotype);
 }
 
-double BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+int BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int ones_counter = 0;
     for(int i = 0; i < individual.size(); i++)

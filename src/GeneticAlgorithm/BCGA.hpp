@@ -18,7 +18,7 @@ namespace BCGA {
     class EncodingSotnezovBCGA;
     class BinaryIndividual;
     enum class OutputMode {Silent, Normal, Max};
-    enum class Fitness {CovLen, MaxBinsNum};
+    enum class Fitness {CovLen, MaxBinsNum, Mixed};
 
     namespace GlobalSettings {
         #include "GlobalSettings.cfg"
@@ -73,17 +73,17 @@ public:
     virtual void get_parent_indices(int& p1, int& p2) = 0;
     virtual BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2) = 0;
     virtual void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter) = 0;
-    virtual double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual) = 0;
+    virtual int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual) = 0;
     virtual void selection(int iteration) = 0;
 
     BinaryIndividual& get_best_individual();
-    virtual void check_compatibility() {};
-    void create_matrix(int m, int n);
     void print_individuals();
     void print_solution(BooleanMatrix::BooleanMatrix& M);
-    void analyze_solution(BooleanMatrix::BooleanMatrix& M);
     void analyze_alikeness(int t);
     void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename = GlobalSettings::default_out_filename);
+
+    virtual void check_compatibility() {};
+    virtual void analyze_solution(BooleanMatrix::BooleanMatrix& M) {};
 
     ~BaseBCGA() {};
 };
@@ -110,7 +110,7 @@ public:
     void get_parent_indices(int& p1, int& p2);
     BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2);
     void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter);
-    double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     void selection(int iteration);
 };
 
@@ -134,9 +134,12 @@ public:
     std::vector<int> build_decreasing_counters(std::vector<bool>& columns, std::vector<int>& columns_argsort);
     void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
     void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    double covlen_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
-    double maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
-    double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    int covlen_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    int maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    int mixed_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+
+    void analyze_solution(BooleanMatrix::BooleanMatrix& M);
 };
 
 #endif

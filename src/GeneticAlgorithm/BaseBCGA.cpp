@@ -107,23 +107,6 @@ void BCGA::BaseBCGA::print_solution(BooleanMatrix::BooleanMatrix& M)
     }
 }
 
-void BCGA::BaseBCGA::analyze_solution(BooleanMatrix::BooleanMatrix& M)
-{
-    std::vector<int> scores;
-    int genotype_len = population[0].size();
-
-    std::cout << "Analyzing..." << std::endl;
-    for(int j = 0; j < population.size(); j++) {
-        int f = fitness(M, population[j]);
-        std::cout << j + 1 << ") ";
-        std::cout << "Fitness: " << f << ',';
-        if(f < n + 1)
-            std::cout << " columns not included: " << n - f << std::endl;
-        else
-            std::cout << " not a covering" << std::endl;
-    }
-}
-
 void BCGA::BaseBCGA::analyze_alikeness(int t)
 {
     for(int i = 0; i < t; i++) {

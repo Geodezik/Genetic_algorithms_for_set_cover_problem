@@ -16,7 +16,7 @@ int main()
     int K = 200;
     float C = 0.001;
     int population_size = 5;
-    int max_iter = 2500;
+    int max_iter = 1000;
 
     std::random_device rd{};
     std::mt19937 rng{rd()};
@@ -48,12 +48,12 @@ int main()
         M[i][uid(rng)] = true;
     }
 
-    std::vector<int> groups_idx = {0, 22, 74, 122, 198, 244, 399, 524, 666, 680, 722, 740};
+    std::vector<int> groups_idx = {0, 22, 74, 122, 198, 244, 399, 524, 666, 680, 722, 740, 900, 1099, 1311};
 
     //SotnezovBCGA A = SotnezovBCGA(population_size, K, C, max_iter, seed, OutputMode::Normal);
-    EncodingSotnezovBCGA A = EncodingSotnezovBCGA(population_size, groups_idx, Fitness::MaxBinsNum, K, C, max_iter, seed, OutputMode::Max);
+    EncodingSotnezovBCGA A = EncodingSotnezovBCGA(population_size, groups_idx, Fitness::CovLen, K, C, max_iter, seed, OutputMode::Normal);
     A.fit(M);
-    //A.print_solution(M);
+    A.analyze_solution(M);
 
     return 0;
 }
