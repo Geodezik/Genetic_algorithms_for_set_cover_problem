@@ -17,6 +17,7 @@ namespace BCGA {
     class SotnezovBCGA;
     class EncodingSotnezovBCGA;
     class BinaryIndividual;
+
     enum class OutputMode {Silent, Normal, Max};
     enum class Fitness {CovLen, MaxBinsNum, Mixed};
 
@@ -52,6 +53,7 @@ protected:
     int extended_population_size;
     int best_score = -1;
     int best_index = -1;
+    bool is_fitted = false;
     double mutation_proba;
 
     int m;

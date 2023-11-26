@@ -216,6 +216,9 @@ int BCGA::EncodingSotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::B
 
 void BCGA::EncodingSotnezovBCGA::analyze_solution(BooleanMatrix::BooleanMatrix& M)
 {
+    if(!is_fitted)
+        throw std::runtime_error("NotFittedError");
+
     int best_covlen = n;
     int best_maxbinsnum = n;
     int best_mixed = n;

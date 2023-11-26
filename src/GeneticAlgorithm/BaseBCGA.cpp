@@ -74,10 +74,14 @@ void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M) {
         std::cout << "Learning finished in " << fit_time << " s" << std::endl;
         std::cout << std::endl;
     }
+
+    is_fitted = true;
 }
 
 BCGA::BinaryIndividual& BCGA::BaseBCGA::get_best_individual()
 {
+    if(!is_fitted)
+        throw std::runtime_error("NotFittedError");
     if ((best_index >= population_size) || (best_index == -1))
         throw std::out_of_range("Solution index (best_index) either wasn't defined or out of range");
     return population[best_index];
@@ -85,12 +89,16 @@ BCGA::BinaryIndividual& BCGA::BaseBCGA::get_best_individual()
 
 void BCGA::BaseBCGA::print_individuals()
 {
+    if(!is_fitted)
+        throw std::runtime_error("NotFittedError");
     for(int i = 0; i < population_size; i++)
         std::cout << population[i] << std::endl;
 }
 
 void BCGA::BaseBCGA::print_solution(BooleanMatrix::BooleanMatrix& M)
 {
+    if(!is_fitted)
+        throw std::runtime_error("NotFittedError");
     if(n > GlobalSettings::MaxOutputLength)
         std::cout << "WARNING: Solution output can be too huge." << std::endl;
 
@@ -109,6 +117,8 @@ void BCGA::BaseBCGA::print_solution(BooleanMatrix::BooleanMatrix& M)
 
 void BCGA::BaseBCGA::analyze_alikeness(int t)
 {
+    if(!is_fitted)
+        throw std::runtime_error("NotFittedError");
     for(int i = 0; i < t; i++) {
         int alike_counter = 0;
         int example = -1;
@@ -135,8 +145,10 @@ void BCGA::BaseBCGA::analyze_alikeness(int t)
 
 void BCGA::BaseBCGA::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
 {
-  std::ofstream f;
-  f.open(filename, std::ofstream::app);
-  f << fit_time << " " << fitness(M, get_best_individual()) << '\n';
-  f.close();
+    if(!is_fitted)
+        throw std::runtime_error("NotFittedError");
+    std::ofstream f;
+    f.open(filename, std::ofstream::app);
+    f << fit_time << " " << fitness(M, get_best_individual()) << '\n';
+    f.close();
 }
