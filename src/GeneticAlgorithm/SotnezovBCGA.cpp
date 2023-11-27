@@ -1,7 +1,6 @@
 #include "BCGA.hpp"
 
-template <typename T>
-std::vector<int> BCGA::SotnezovBCGA::argsort(const std::vector<T> &v) {
+std::vector<int> BCGA::SotnezovBCGA::argsort(const std::vector<int> &v) {
     //Argsort for any type of elem-comparable vectors
     std::vector<int> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
@@ -134,12 +133,7 @@ void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M,
         population.push_back(BinaryIndividual(new_genes));
         //optimize_covering(M, population[i].genotype);
 
-        int f = fitness(M, population[i]);
-        scores_sum += f;
-        if(f < best_score) {
-            best_score = f;
-            best_index = i;
-        }
+        scores_sum += fitness(M, population[i]); // meh
     }
 }
 
@@ -159,7 +153,7 @@ BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, 
         rel_sum = 1;
     }
     std::vector<double> probs;
-    for(int i = 0; i < scores.size(); i++) {
+    for(int i = 0; i < population_size; i++) {
         int rel_score = scores[i] - best_score + 1;
         probs.push_back((1.0 / rel_score) / rel_sum);
     }
@@ -256,12 +250,6 @@ void BCGA::SotnezovBCGA::selection(int iteration)
     if(child_in_population || bad_child) {
         if(verbose == OutputMode::Max)
             std::cout << ", replaced: " << "None" << ", child score: " << child_score << std::endl;
-        unluck_counter++;
-        if(unluck_counter >= 10) {
-            unluck_counter = 0;
-            // recreate half population ?
-            
-        }
         population.pop_back();
         return;
     }

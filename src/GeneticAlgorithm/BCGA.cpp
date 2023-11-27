@@ -4,3 +4,4 @@
 #include "BaseBCGA.cpp"
 #include "SotnezovBCGA.cpp"
 #include "EncodingSotnezovBCGA.cpp"
+#include "RankedEncodingSotnezovBCGA.cpp"

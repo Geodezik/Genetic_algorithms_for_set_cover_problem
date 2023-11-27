@@ -7,6 +7,8 @@ BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, doub
     this->max_iter = max_iter;
     this->mutation_proba =  mutation_proba;
     this->verbose = verbose;
+    this->scores = std::vector<int>(extended_population_size);
+
     if(seed >= 0)
         this->rng = std::mt19937(seed);
     else
@@ -29,7 +31,16 @@ void BCGA::BaseBCGA::print_stats(std::vector<int>& argbest, int iteration)
     }
 }
 
+void BCGA::BaseBCGA::update_scores(BooleanMatrix::BooleanMatrix& M)
+{
+    for(int j = population_size; j < extended_population_size; j++)
+        scores[j] = fitness(M, population[j]);
+}
+
 void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M) {
+    if(is_fitted)
+        throw std::runtime_error("IsAlreadyFittedError");
+
     std::time_t start = std::time(nullptr);
     this->m = M.get_m();
     this->n = M.get_n();
@@ -40,8 +51,14 @@ void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M) {
     create_zero_generation(M, n);
 
     scores.clear();
-    for(int j = 0; j < population_size; j++)
-        scores.push_back(fitness(M, population[j]));
+    for(int j = 0; j < population_size; j++) {
+        int f = fitness(M, population[j]);
+        if(f < best_score) {
+            best_score = f;
+            best_index = j;
+        }
+        scores[j] = f;
+    }
 
     //CROSSOVER (creating extended population)
     int delta = extended_population_size - population_size;
@@ -60,8 +77,7 @@ void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M) {
         mutate(M, mutation_proba, i);
 
         //Get scores for new individuals
-        for(int j = population_size; j < extended_population_size; j++)
-            scores[j] = fitness(M, population[j]);
+        update_scores(M);
 
         //Selection
         selection(i);

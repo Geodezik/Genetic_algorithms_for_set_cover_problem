@@ -16,6 +16,7 @@ namespace BCGA {
     class BaseBCGA;
     class SotnezovBCGA;
     class EncSotnezovBCGA;
+    class REncSotnezovBCGA;
     class BinaryIndividual;
 
     enum class OutputMode {Silent, Normal, Max};
@@ -70,6 +71,7 @@ protected:
     virtual int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual) = 0;
     virtual void selection(int iteration) = 0;
 
+    virtual void update_scores(BooleanMatrix::BooleanMatrix& M);
     virtual void check_compatibility() {};
     virtual void analyze_solution(BooleanMatrix::BooleanMatrix& M) {};
 public:
@@ -91,13 +93,11 @@ public:
 class BCGA::SotnezovBCGA: public BCGA::BaseBCGA {
 protected:
     int scores_sum = 0;
-    int unluck_counter = 0;
 
     int K = 100;
     float C = 0.01;
 
-    template <typename T>
-    std::vector<int> argsort(const std::vector<T> &v);
+    std::vector<int> argsort(const std::vector<int> &v);
 
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
     void get_parent_indices(int& p1, int& p2);
@@ -121,10 +121,8 @@ protected:
     std::vector<int> group_counters;
     std::vector<int> columns_groups;
 
-    template <typename T>
-    std::vector<int> conditional_argsort(const std::vector<T> &v, const std::vector<T> &c);
-    template <typename T>
-    std::vector<int> special_conditional_argsort(const std::vector<T> &v, const std::vector<T> &a, const std::vector<T> &b);
+    std::vector<int> conditional_argsort(const std::vector<int> &v, const std::vector<int> &c);
+    std::vector<int> enc_conditional_argsort(const std::vector<int> &v);
 
     void check_compatibility();
     void fill_counters(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
@@ -141,6 +139,22 @@ public:
                          int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
+};
+
+class BCGA::REncSotnezovBCGA: public BCGA::EncSotnezovBCGA {
+    std::vector<float> columns_ranks;
+    std::vector<float> individual_ranks;
+
+    float best_rank;
+
+    float rank(BinaryIndividual& individual);
+
+    void update_scores(BooleanMatrix::BooleanMatrix& M);
+    void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
+    void selection(int iteration);
+public:
+    REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<float> ranks, Fitness optimize = Fitness::CovLen,
+                     int K = 100, float C = 0.01, int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 };
 
 #endif

@@ -1,7 +1,6 @@
 #include "BCGA.hpp"
 
-template <typename T>
-std::vector<int> BCGA::EncSotnezovBCGA::conditional_argsort(const std::vector<T> &v, const std::vector<T> &c) {
+std::vector<int> BCGA::EncSotnezovBCGA::conditional_argsort(const std::vector<int> &v, const std::vector<int> &c) {
     //Argsort, but for equal values: bigger c => earlier
     std::vector<int> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
@@ -12,11 +11,13 @@ std::vector<int> BCGA::EncSotnezovBCGA::conditional_argsort(const std::vector<T>
     return idx;
 }
 
-template <typename T>
-std::vector<int> BCGA::EncSotnezovBCGA::special_conditional_argsort(const std::vector<T> &v, const std::vector<T> &a, const std::vector<T> &b) {
+std::vector<int> BCGA::EncSotnezovBCGA::enc_conditional_argsort(const std::vector<int> &v) {
     //Argsort, but for equal values: bigger c => earlier
     std::vector<int> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
+
+    std::vector<int> &a = columns_groups;
+    std::vector<int> &b = group_counters;
 
     std::stable_sort(idx.begin(), idx.end(),
         [&v, &a, &b](int i1, int i2) {return (v[i1] < v[i2]) || ((v[i1] == v[i2]) && (b[a[i1]] > b[a[i2]]));});
@@ -102,7 +103,7 @@ void BCGA::EncSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, s
             break;
         case Fitness::MaxBinsNum:
         case Fitness::Mixed:
-            //queue = special_conditional_argsort(column_scores, columns_groups, group_counters);
+            //queue = enc_conditional_argsort(column_scores);
             queue = argsort(column_scores);
             decreasing_group_counters = build_decreasing_counters(columns, queue);
             queue = conditional_argsort(column_scores, decreasing_group_counters);
