@@ -232,11 +232,13 @@ void BCGA::SotnezovBCGA::selection(int iteration)
         }
     }
 
-    if(verbose == OutputMode::Normal)
-        std::cout << "Generation: " << iteration << ", best score: " << best_score << std::endl;
-    else if(verbose == OutputMode::Max) {
-        std::cout << "Generation: " << iteration << ", best score: " << best_score;
-        std::cout << ", already in this population: " << child_in_population << ", hit by child: " << hit_by_child;
+    switch(verbose) {
+        case OutputMode::Normal:
+            std::cout << "Generation: " << iteration << ", best score: " << best_score << std::endl;
+            break;
+        case OutputMode::Max:
+            std::cout << "Generation: " << iteration << ", best score: " << best_score;
+            std::cout << ", already in this population: " << child_in_population << ", hit by child: " << hit_by_child;
     }
 
     // find all the worse individuals indices

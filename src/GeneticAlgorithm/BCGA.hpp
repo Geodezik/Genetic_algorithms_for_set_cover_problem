@@ -21,6 +21,7 @@ namespace BCGA {
 
     enum class OutputMode {Silent, Normal, Max};
     enum class Fitness {CovLen, MaxBinsNum, Mixed};
+    enum class RankType{ElementWise, GroupWise};
 
     namespace GlobalSettings {
         #include "GlobalSettings.cfg"
@@ -145,6 +146,7 @@ class BCGA::REncSotnezovBCGA: public BCGA::EncSotnezovBCGA {
     std::vector<float> columns_ranks;
     std::vector<float> individual_ranks;
 
+    RankType rank_type;
     float best_rank;
 
     float rank(BinaryIndividual& individual);
@@ -153,7 +155,7 @@ class BCGA::REncSotnezovBCGA: public BCGA::EncSotnezovBCGA {
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
     void selection(int iteration);
 public:
-    REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<float> ranks, Fitness optimize = Fitness::CovLen,
+    REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<float> ranks, RankType rank_type = RankType::ElementWise, Fitness optimize = Fitness::CovLen,
                      int K = 100, float C = 0.01, int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 };
 

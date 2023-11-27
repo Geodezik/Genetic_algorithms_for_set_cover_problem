@@ -1,23 +1,46 @@
 #include "BCGA.hpp"
 
-BCGA::REncSotnezovBCGA::REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<float> ranks, Fitness optimize, int K, float C, int max_iter, int seed, OutputMode verbose):
+BCGA::REncSotnezovBCGA::REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<float> ranks, RankType rank_type, Fitness optimize, int K, float C, int max_iter, int seed, OutputMode verbose):
                                          BCGA::EncSotnezovBCGA(population_size, groups_idx, optimize, K, C, max_iter, seed, verbose)
 {
     this->columns_ranks = ranks;
+    this->rank_type = rank_type;
     this->individual_ranks = std::vector<float>(extended_population_size);
 }
 
 float BCGA::REncSotnezovBCGA::rank(BinaryIndividual& individual)
 {
-    float ind_rank = 0.0;
-    int cov_len = 0;
-    for(int i = 0; i < n; i++) {
-        if(!individual.genotype[i])
-            continue;
-        ind_rank += columns_ranks[i];
-        cov_len++;
+    switch(rank_type) {
+        case RankType::ElementWise: {
+            float ind_rank = 0.0;
+            int cov_len = 0;
+            for(int i = 0; i < n; i++) {
+                if(!individual.genotype[i])
+                    continue;
+                ind_rank += columns_ranks[i];
+                cov_len++;
+            }
+            return ind_rank / cov_len;
+        } case RankType::GroupWise: {
+            float ind_rank = 0.0;
+            for(int group = 0; group < groups_idx.size() - 1; group++) {
+                float group_sum_rank = 0.0;
+                int intersection_len = 0;
+                for(int i = groups_idx[group]; i < groups_idx[group + 1]; i++) {
+                    if(!individual.genotype[i])
+                        continue;
+                    group_sum_rank += columns_ranks[i];
+                    intersection_len++;
+                }
+                ind_rank += group_sum_rank / intersection_len;
+            }
+            return ind_rank / (groups_idx.size() - 1);
+        } default:
+            throw std::invalid_argument("Unknown rank function in rank call");
     }
-    return ind_rank / cov_len;
+
+    throw std::invalid_argument("Unknown rank function in rank call");
+    return 0;
 }
 
 void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
@@ -91,11 +114,13 @@ void BCGA::REncSotnezovBCGA::selection(int iteration)
         }
     }
 
-    if(verbose == OutputMode::Normal)
-        std::cout << "Generation: " << iteration << ", best score: " << best_score << ", best rank: " << best_rank << std::endl;
-    else if(verbose == OutputMode::Max) {
-        std::cout << "Generation: " << iteration << ", best score: " << best_score << ", best rank: " << best_rank;
-        std::cout << ", already in this population: " << child_in_population << ", hit by child: " << hit_by_child;
+    switch(verbose) {
+        case OutputMode::Normal:
+            std::cout << "Generation: " << iteration << ", best score: " << best_score << ", best rank: " << best_rank << std::endl;
+            break;
+        case OutputMode::Max:
+            std::cout << "Generation: " << iteration << ", best score: " << best_score << ", best rank: " << best_rank;
+            std::cout << ", already in this population: " << child_in_population << ", hit by child: " << hit_by_child;
     }
 
     // find all the worse individuals indices
