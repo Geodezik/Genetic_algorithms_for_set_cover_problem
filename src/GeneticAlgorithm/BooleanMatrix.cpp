@@ -3,23 +3,12 @@
 BooleanMatrix::BooleanMatrix::BooleanMatrix(int m, int n) {
     this->m = m;
     this->n = n;
-    M = new bool*[m];
+    rows = std::vector<boost::dynamic_bitset<>>();
+    columns = std::vector<boost::dynamic_bitset<>>();
     for (int i = 0; i < m; i++)
-        M[i] = new bool[n];
-}
-
-BooleanMatrix::BooleanMatrix::BooleanMatrix(const BooleanMatrix& B) {
-    std::cout << "WARNING: detected attempt to copy an object of BooleanMatrix. ";
-    std::cout << "This operation is very time-consuming, use references instead." << std::endl;
-    this->m = B.m;
-    this->n = B.n;
-    this->M = new bool*[m];
-    for (int i = 0; i < m; i++) {
-        this->M[i] = new bool[n];
-        for(int j = 0; j < n; j++) {
-            this->M[i][j] = B.M[i][j];
-        }
-    }
+        rows.push_back(boost::dynamic_bitset<>(n, 0));
+    //for (int j = 0; j < n; j++)
+        //columns.push_back(boost::dynamic_bitset<>(m, 0));
 }
 
 int BooleanMatrix::BooleanMatrix::get_m() {
@@ -30,13 +19,12 @@ int BooleanMatrix::BooleanMatrix::get_n() {
     return n;
 }
 
-bool BooleanMatrix::BooleanMatrix::is_covered_by(std::vector<bool>& columns)
-{
+bool BooleanMatrix::BooleanMatrix::is_covered_by(boost::dynamic_bitset<>& columns) {
     for(int i = 0; i < m; i++) {
         bool flag = false;
         for(int j = 0; j < n; j++) {
             // gene in set and elem in M is 1
-            if(columns[j] && M[i][j]) {
+            if(columns[j] && rows[i][j]) {
                 flag = true;
                 break;
             }
@@ -48,13 +36,13 @@ bool BooleanMatrix::BooleanMatrix::is_covered_by(std::vector<bool>& columns)
     return true;
 }
 
-BooleanMatrix::BooleanMatrix::~BooleanMatrix() {
-    for (int i = 0; i < m; i++)
-        delete M[i];
-    delete M;
+BooleanMatrix::BooleanMatrix::~BooleanMatrix() {}
+
+bool BooleanMatrix::BooleanMatrix::get(int i, int j) {
+    return rows[i][j];
 }
 
-bool* BooleanMatrix::BooleanMatrix::operator[](int index)
-{
-    return M[index];
+void BooleanMatrix::BooleanMatrix::set(int i, int j, bool val) {
+    rows[i][j] = val;
+    //columns[j][i] = val;
 }

@@ -1,13 +1,13 @@
 #include "Greedy.hpp"
 
-int Greedy::GreedyAlgorithm::get_column_score(BooleanMatrix::BooleanMatrix& M, int j, std::vector<bool> &row_is_covered)
+int Greedy::GreedyAlgorithm::get_column_score(BooleanMatrix::BooleanMatrix& M, int j, boost::dynamic_bitset<>& row_is_covered)
 {
     int m = M.get_m();
     int n = M.get_n();
     int score = 0;
 
     for(int i = 0; i < m; i++) {
-        if(M[i][j] && !row_is_covered[i])
+        if(M.get(i, j) && !row_is_covered[i])
             score++;
     }
 
@@ -28,11 +28,11 @@ int Greedy::GreedyAlgorithm::get_argmax_score(std::vector<int> &scores, int n)
     return argmax_score;
 }
 
-void Greedy::GreedyAlgorithm::update(BooleanMatrix::BooleanMatrix& M, int j, std::vector<bool> &row_is_covered, int &not_covered_counter)
+void Greedy::GreedyAlgorithm::update(BooleanMatrix::BooleanMatrix& M, int j, boost::dynamic_bitset<>& row_is_covered, int &not_covered_counter)
 {
     int m = M.get_m();
     for(int i = 0; i < m; i++)
-        if(M[i][j] and !row_is_covered[i]) {
+        if(M.get(i, j) and !row_is_covered[i]) {
             row_is_covered[i] = true;
             not_covered_counter--;
         }
@@ -43,8 +43,8 @@ void Greedy::GreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
     std::time_t start = std::time(nullptr);
     int m = M.get_m();
     int n = M.get_n();
-    columns = std::vector<bool>(n);
-    std::vector<bool> row_is_covered(m);
+    columns = boost::dynamic_bitset<>(n, 0);
+    boost::dynamic_bitset<> row_is_covered(m, 0);
     std::vector<int> scores(n);
     int not_covered_counter = m;
 
@@ -59,28 +59,10 @@ void Greedy::GreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
     fit_time = finish - start;
 }
 
-void Greedy::GreedyAlgorithm::print_solution(BooleanMatrix::BooleanMatrix& M)
-{
-    int m = M.get_m();
-    int n = M.get_n();
-    if(n > 100)
-        std::cout << "WARNING: Solution output can be too huge." << std::endl;
-
-    std::cout << "Coverage: " << std::endl;
-    std::cout << columns.size() << std::endl;
-    for(auto elem: columns)
-        std::cout << elem << " ";
-    std::cout << std::endl;
-}
-
 void Greedy::GreedyAlgorithm::analyze()
 {
     std::cout << "Analyzing..." << std::endl;
-
-    int s = 0;
-    for(auto elem: columns)
-        s += elem;
-    std::cout << "Covering length: " << s << std::endl;
+    std::cout << "Covering length: " << columns.count() << std::endl;
 }
 
 void Greedy::GreedyAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
@@ -124,7 +106,7 @@ void Greedy::EncodingGreedyAlgorithm::optimize_covering(BooleanMatrix::BooleanMa
     std::vector<int> column_scores(n);
     for(int i = 0; i < m; i++)
         for(int j = 0; j < n; j++)
-            if(M[i][j] & columns[j]) {
+            if(M.get(i, j) & columns[j]) {
                 row_scores[i]++;
                 column_scores[j]++;
             }
@@ -146,7 +128,7 @@ void Greedy::EncodingGreedyAlgorithm::optimize_covering(BooleanMatrix::BooleanMa
 
         bool flag = true;
         for(int j = 0; j < m; j++)
-            if(M[j][col] && (row_scores[j] < 2)) {
+            if(M.get(j, col) && (row_scores[j] < 2)) {
                 flag = false;
                 break;
             }
@@ -158,8 +140,8 @@ void Greedy::EncodingGreedyAlgorithm::optimize_covering(BooleanMatrix::BooleanMa
         group_counters[features[col]]--;
         for(int j = 0; j < m; j++) {
             // Decrease scores
-            if(M[j][col])
-                    row_scores[j]--;
+            if(M.get(j, col))
+                row_scores[j]--;
         }
     }
 }
@@ -175,8 +157,8 @@ void Greedy::EncodingGreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
 
     clear_counters();
 
-    columns = std::vector<bool>(n);
-    std::vector<bool> row_is_covered(m);
+    columns = boost::dynamic_bitset<>(n, 0);
+    boost::dynamic_bitset<> row_is_covered(m, 0);
     std::vector<int> scores(n);
     int not_covered_counter = m;
 
@@ -200,6 +182,7 @@ void Greedy::EncodingGreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
                 break;
             }
     }
+
     optimize_covering(M);
 
     std::time_t finish = std::time(nullptr);
@@ -209,15 +192,13 @@ void Greedy::EncodingGreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
 void Greedy::EncodingGreedyAlgorithm::analyze()
 {
     std::cout << "Analyzing..." << std::endl;
-
-    int s = 0;
-    for(auto elem: columns)
-        s += elem;
-    std::cout << "Covering length: " << s << std::endl;
+    std::cout << "Covering length: " << columns.count() << std::endl;
 
     int enc_rank = 0;
-    for(auto it = group_counters.begin(); it != group_counters.end(); it++)
+    for(auto it = group_counters.begin(); it != group_counters.end(); it++) {
         if(it->second > enc_rank)
             enc_rank = it->second;
+        //std::cout << it->first << ' ' << it->second << std::endl;
+    }
     std::cout << "Encoding rank: " << enc_rank << std::endl;
 }

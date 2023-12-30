@@ -45,6 +45,7 @@ float BCGA::REncSotnezovBCGA::rank(BinaryIndividual& individual)
 
 void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
 {
+    throw std::out_of_range("Fuck"); // FIX THIS CLASS!
     population.clear();
     this->m = M.get_m();
     this->n = M.get_n();
@@ -54,7 +55,7 @@ void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix
     double p = GlobalSettings::SotnezovInitProbability;
     std::bernoulli_distribution bd(p);
     for(int i = 0; i < population_size; i++) {
-        std::vector<bool> new_genes;
+        boost::dynamic_bitset<> new_genes;
         for(int j = 0; j < genotype_len; j++)
             new_genes.push_back(bd(rng));
 

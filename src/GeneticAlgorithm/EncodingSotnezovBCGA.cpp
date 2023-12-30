@@ -57,7 +57,7 @@ void BCGA::EncSotnezovBCGA::check_compatibility()
             columns_groups[j] = group;  
 }
 
-void BCGA::EncSotnezovBCGA::fill_counters(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
+void BCGA::EncSotnezovBCGA::fill_counters(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     for(int i = 0; i < group_counters.size(); i++)
         group_counters[i] = 0;
@@ -67,7 +67,7 @@ void BCGA::EncSotnezovBCGA::fill_counters(BooleanMatrix::BooleanMatrix& M, std::
             group_counters[group] += columns[j];
 }
 
-std::vector<int> BCGA::EncSotnezovBCGA::build_decreasing_counters(std::vector<bool>& columns, std::vector<int>& columns_argsort)
+std::vector<int> BCGA::EncSotnezovBCGA::build_decreasing_counters(boost::dynamic_bitset<>& columns, std::vector<int>& columns_argsort)
 {
     std::vector<int> group_counters_copy = group_counters;
     std::vector<int> decreasing_group_counters(n);
@@ -80,31 +80,33 @@ std::vector<int> BCGA::EncSotnezovBCGA::build_decreasing_counters(std::vector<bo
     return decreasing_group_counters;
 }
 
-void BCGA::EncSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
+void BCGA::EncSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     fill_counters(M, columns);
 
+    // HARDEST PART!!!!!!!
     std::vector<int> row_scores(m);
-    std::vector<int> column_scores(n);
-    for(int i = 0; i < m; i++)
-        for(int j = 0; j < n; j++)
-            if(M[i][j] & columns[j]) {
-                row_scores[i]++;
-                column_scores[j]++;
-            }
+
+    for(int j = 0; j < n; j++) {
+        if(!columns[j])
+            continue;
+        for(int i = 0; i < m; i++)
+            row_scores[i] += M.get(i, j);
+    }
 
     // iterate through columns (from worst to best), exclude if can
     std::vector<int> queue;
     std::vector<int> decreasing_group_counters;
 
+    // Very easy
     switch(fit_function) {
         case Fitness::CovLen:
-            queue = argsort(column_scores);
+            queue = apriori_queue;
             break;
         case Fitness::MaxBinsNum:
         case Fitness::Mixed:
             //queue = enc_conditional_argsort(column_scores);
-            queue = argsort(column_scores);
+            queue = apriori_queue;
             decreasing_group_counters = build_decreasing_counters(columns, queue);
             queue = conditional_argsort(column_scores, decreasing_group_counters);
             break;
@@ -113,41 +115,43 @@ void BCGA::EncSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, s
     }
 
     for(int i = 0; i < n; i++) {
-        if(group_counters[columns_groups[queue[i]]] < 1)
-            throw std::out_of_range("WTF");
+        if(!columns[queue[i]])
+            continue;
+
         if(group_counters[columns_groups[queue[i]]] == 1)
             continue;
 
-        //zero rows covered or not in covering
-        if(!column_scores[queue[i]]) {
-            if(columns[queue[i]]) {
-                columns[queue[i]] = false;
-                group_counters[columns_groups[queue[i]]]--;
-            }
+        //zero rows covered
+        if(column_scores[queue[i]] == 0) {
+            columns[queue[i]] = false;
+            group_counters[columns_groups[queue[i]]]--;
             continue;
         }
 
         bool flag = true;
-        for(int j = 0; j < m; j++)
-            if(M[j][queue[i]] && (row_scores[j] < GlobalSettings::SotnezovThreshold)) {
+        std::vector<int> row_scores_copy = row_scores;
+        for(int j = 0; j < m; j++) {
+            if(M.get(j, queue[i]) && (row_scores[j] < GlobalSettings::SotnezovThreshold)) {
                 flag = false;
                 break;
             }
+            row_scores_copy[j] -= M.get(j, queue[i]);
+        }
 
-        if(!flag)
+        if(!flag) 
             continue;
 
         columns[queue[i]] = false;
         group_counters[columns_groups[queue[i]]]--;
-        for(int j = 0; j < m; j++) {
-            // Decrease scores
-            if(M[j][queue[i]])
-                row_scores[j]--;
-        }
+
+        // Decrease scores
+        //for(int j = 0; j < m; j++)
+            //row_scores[j] -= M.get(j, queue[i]);
+        row_scores = row_scores_copy;
     }
 }
 
-void BCGA::EncSotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
+void BCGA::EncSotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     std::vector<bool> covered_rows = get_covered_rows(M, columns);
 
@@ -161,7 +165,7 @@ void BCGA::EncSotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& M, st
         int random_column = columns_d(rng);
         columns[random_column] = true;
         for(int i = 0; i < m; i++)
-            covered_rows[i] = (covered_rows[i] || M[i][random_column]);
+            covered_rows[i] = (covered_rows[i] || M.get(i, random_column));
     }
 
     for(int i = 0; i < covered_rows.size(); i++) {

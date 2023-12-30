@@ -1,6 +1,6 @@
 #include "BCGA.hpp"
 
-std::vector<int> BCGA::SotnezovBCGA::argsort(const std::vector<int> &v) {
+std::vector<int> BCGA::SotnezovBCGA::argsort(const std::vector<int>& v) {
     //Argsort for any type of elem-comparable vectors
     std::vector<int> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
@@ -20,31 +20,33 @@ BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int K, float C, int max_it
     this->C = C;
 }
 
-void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
+void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     // possible upgrade: sort not all the indices but covering indices
     std::vector<int> row_scores(m);
-    std::vector<int> column_scores(n);
-    for(int i = 0; i < m; i++)
-        for(int j = 0; j < n; j++)
-            if(M[i][j] & columns[j]) {
-                row_scores[i]++;
-                column_scores[j]++;
-            }
+    for(int j = 0; j < n; j++) {
+        if(!columns[j])
+            continue;
+        for(int i = 0; i < m; i++)
+            row_scores[i] += M.get(i, j);
+    }
 
     // iterate through columns (from worst to best), exclude if can
-    std::vector<int> queue = argsort(column_scores);
-    for(int i = 0; i < n; i++) {
+    std::vector<int> queue = apriori_queue;
+    for(int j = 0; j < n; j++) {
+        if(!columns[queue[j]])
+            continue;
+
         //zero rows covered or not in covering
-        if(!column_scores[queue[i]]) {
-            if(columns[queue[i]])
-                columns[queue[i]] = false;
+        if(column_scores[queue[j]] == 0) {
+            columns[queue[j]] = false;
             continue;
         }
 
-        bool flag = true;
-        for(int j = 0; j < m; j++)
-            if(M[j][queue[i]] && (row_scores[j] < GlobalSettings::SotnezovThreshold)) {
+        bool flag = true; // can be kicked?
+        for(int i = 0; i < m; i++)
+            if(M.get(i, queue[j]) && (row_scores[i] < GlobalSettings::SotnezovThreshold)) {
+                // column is important
                 flag = false;
                 break;
             }
@@ -52,22 +54,22 @@ void BCGA::SotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, std:
         if(!flag)
             continue;
 
-        columns[queue[i]] = false;
-        for(int j = 0; j < m; j++) {
+        columns[queue[j]] = false;
+        for(int i = 0; i < m; i++) {
             // Decrease scores
-            if(M[j][queue[i]])
-                    row_scores[j]--;
+            if(M.get(i, queue[j]))
+                row_scores[i]--;
         }
     }
 }
 
-std::vector<bool> BCGA::SotnezovBCGA::get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool> &columns)
+std::vector<bool> BCGA::SotnezovBCGA::get_covered_rows(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     std::vector<bool> covered_rows;
     for(int i = 0; i < m; i++) {
         bool flag = false;
         for(int j = 0; j < n; j++)
-            if(M[i][j] & columns[j]) {
+            if(M.get(i, j) & columns[j]) {
                 flag = true;
                 break;
             }
@@ -77,17 +79,17 @@ std::vector<bool> BCGA::SotnezovBCGA::get_covered_rows(BooleanMatrix::BooleanMat
     return covered_rows;
 }
 
-void BCGA::SotnezovBCGA::add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row, int from, int to)
+void BCGA::SotnezovBCGA::add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, boost::dynamic_bitset<>& columns, int row, int from, int to)
 {
     int max_score = -1;
     int argmax_score = from;
     for(int i = from; i < to; i++) {
         //i doesn't cover this row or already added
-        if(!M[row][i] || columns[i])
+        if(!M.get(row, i) || columns[i])
             continue;
         int score = 1;
         for(int j = row + 1; j < m; j++)
-            score += (M[j][i] && !covered_rows[j]);
+            score += (M.get(j, i) && !covered_rows[j]);
         if(score > max_score) {
             max_score = score;
             argmax_score = i;
@@ -96,14 +98,14 @@ void BCGA::SotnezovBCGA::add_maxscore_column(BooleanMatrix::BooleanMatrix& M, st
 
     //covers some others
     for(int i = 0; i < m; i++)
-        if(M[i][argmax_score])
+        if(M.get(i, argmax_score))
             covered_rows[i] = true;
 
     //!!!
     columns[argmax_score] = true;
 }
 
-void BCGA::SotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns)
+void BCGA::SotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     std::vector<bool> covered_rows = get_covered_rows(M, columns);
     for(int j = 0; j < covered_rows.size(); j++) {
@@ -125,7 +127,7 @@ void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M,
     double p = GlobalSettings::SotnezovInitProbability;
     std::bernoulli_distribution bd(p);
     for(int i = 0; i < population_size; i++) {
-        std::vector<bool> new_genes;
+        boost::dynamic_bitset<> new_genes;
         for(int j = 0; j < genotype_len; j++)
             new_genes.push_back(bd(rng));
 
@@ -135,6 +137,16 @@ void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M,
 
         scores_sum += fitness(M, population[i]); // meh
     }
+
+    //count apriori_column_scores
+    column_scores = std::vector<int>();
+    for(int j = 0; j < n; j++) {
+        int s = 0;
+        for(int i = 0; i < m; i++)
+            s += M.get(i, j);
+        column_scores.push_back(s);
+    }
+    apriori_queue = argsort(column_scores);
 }
 
 void BCGA::SotnezovBCGA::get_parent_indices(int& p1, int& p2)
@@ -144,7 +156,7 @@ void BCGA::SotnezovBCGA::get_parent_indices(int& p1, int& p2)
 
 BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, BinaryIndividual& parent2)
 {
-    std::vector<bool> new_genotype;
+    boost::dynamic_bitset<> new_genotype;
 
     //build probs
     double rel_sum = scores_sum - (best_score - 1) * population_size;
@@ -267,4 +279,18 @@ void BCGA::SotnezovBCGA::selection(int iteration)
     if(verbose == OutputMode::Max)
         std::cout << ", replaced: " << worse[random_individual] << ", child score: " << child_score << std::endl;
     population.pop_back();
+}
+
+void BCGA::SotnezovBCGA::print_columns_to_file(std::string filename) {
+    if(!is_fitted)
+        throw std::runtime_error("NotFittedError");
+    std::ofstream f;
+    f.open(filename, std::ofstream::app);
+    boost::dynamic_bitset<> best_solution = get_best_individual().genotype;
+    for(int i = 0; i < best_solution.size(); i++) {
+        if(best_solution[i] == 0)
+            continue;
+        f << i << '\n';
+    }
+    f.close();
 }

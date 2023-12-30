@@ -120,12 +120,12 @@ void BCGA::BaseBCGA::print_solution(BooleanMatrix::BooleanMatrix& M)
 
     std::cout << "Best individual: " << get_best_individual() << std::endl;
     std::cout << "Coverage: " << std::endl;
-    std::vector<bool> best = get_best_individual().genotype;
+    boost::dynamic_bitset<> best = get_best_individual().genotype;
     for(int i = 0; i < m; i++) {
         for(int j = 0; j < n; j++) {
             if(!best[j])
                 continue;
-            std::cout << M[i][j] << " ";
+            std::cout << M.get(i, j) << " ";
         }
         std::cout << std::endl;
     }

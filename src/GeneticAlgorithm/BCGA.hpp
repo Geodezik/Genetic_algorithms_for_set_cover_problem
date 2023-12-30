@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <ctime>
 #include <stdexcept>
+#include <boost/dynamic_bitset.hpp>
 #include "BooleanMatrix.hpp"
 
 namespace BCGA {
@@ -33,9 +34,9 @@ class BCGA::BinaryIndividual {
 protected:
     bool zero_gen;
 public:
-    std::vector<bool> genotype;
+    boost::dynamic_bitset<> genotype;
 
-    BinaryIndividual(std::vector<bool>& genotype, bool zero_gen=false);
+    BinaryIndividual(boost::dynamic_bitset<>& genotype, bool zero_gen=false);
 
     int size();
     bool is_from_zero_gen();
@@ -74,7 +75,6 @@ protected:
 
     virtual void update_scores(BooleanMatrix::BooleanMatrix& M);
     virtual void check_compatibility() {};
-    virtual void analyze_solution(BooleanMatrix::BooleanMatrix& M) {};
 public:
     BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100,
              int seed = -1, OutputMode verbose = OutputMode::Normal);
@@ -88,11 +88,15 @@ public:
     void analyze_alikeness(int t);
     void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename = GlobalSettings::default_out_filename);
 
+    virtual void analyze_solution(BooleanMatrix::BooleanMatrix& M) {};
+
     ~BaseBCGA() {};
 };
 
 class BCGA::SotnezovBCGA: public BCGA::BaseBCGA {
 protected:
+    std::vector<int> column_scores;
+    std::vector<int> apriori_queue;
     int scores_sum = 0;
 
     int K = 100;
@@ -107,12 +111,13 @@ protected:
     int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     void selection(int iteration);
 
-    virtual void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    virtual std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    virtual void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    virtual void add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, std::vector<bool>& columns, int row, int from, int to);
+    virtual void optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
+    virtual std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
+    virtual void restore_solution(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
+    virtual void add_maxscore_column(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& covered_rows, boost::dynamic_bitset<>& columns, int row, int from, int to);
 public:
     SotnezovBCGA(int population_size, int K = 100, float C = 0.01, int max_iter = 100, int seed = -1, OutputMode verbose = OutputMode::Normal);
+    void print_columns_to_file(std::string filename);
 };
 
 class BCGA::EncSotnezovBCGA: public BCGA::SotnezovBCGA {
@@ -126,11 +131,11 @@ protected:
     std::vector<int> enc_conditional_argsort(const std::vector<int> &v);
 
     void check_compatibility();
-    void fill_counters(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    void fill_counters(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
 
-    std::vector<int> build_decreasing_counters(std::vector<bool>& columns, std::vector<int>& columns_argsort);
-    void optimize_covering(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
-    void restore_solution(BooleanMatrix::BooleanMatrix& M, std::vector<bool>& columns);
+    std::vector<int> build_decreasing_counters(boost::dynamic_bitset<>& columns, std::vector<int>& columns_argsort);
+    void optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
+    void restore_solution(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
     int covlen_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     int maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     int mixed_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);

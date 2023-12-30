@@ -1,8 +1,10 @@
 #include "BCGA.hpp"
 
-BCGA::BinaryIndividual::BinaryIndividual(std::vector<bool>& genotype, bool zero_gen)
+BCGA::BinaryIndividual::BinaryIndividual(boost::dynamic_bitset<>& genotype, bool zero_gen)
 {
     this->zero_gen = zero_gen;
+    //for(auto gene: genotype)
+        //this->genotype.push_back(gene);
     this->genotype = genotype;
 }
 
