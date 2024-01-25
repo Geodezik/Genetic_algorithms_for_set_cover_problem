@@ -103,68 +103,15 @@ BCGA::BinaryIndividual& BCGA::BaseBCGA::get_best_individual()
     return population[best_index];
 }
 
-void BCGA::BaseBCGA::print_individuals()
+void BCGA::BaseBCGA::print_solution(std::string filename)
 {
     if(!is_fitted)
         throw std::runtime_error("NotFittedError");
-    for(int i = 0; i < population_size; i++)
-        std::cout << population[i] << std::endl;
-}
-
-void BCGA::BaseBCGA::print_solution(BooleanMatrix::BooleanMatrix& M)
-{
-    if(!is_fitted)
-        throw std::runtime_error("NotFittedError");
-    if(n > GlobalSettings::MaxOutputLength)
-        std::cout << "WARNING: Solution output can be too huge." << std::endl;
-
-    std::cout << "Best individual: " << get_best_individual() << std::endl;
-    std::cout << "Coverage: " << std::endl;
-    boost::dynamic_bitset<> best = get_best_individual().genotype;
-    for(int i = 0; i < m; i++) {
-        for(int j = 0; j < n; j++) {
-            if(!best[j])
-                continue;
-            std::cout << M.get(i, j) << " ";
-        }
-        std::cout << std::endl;
-    }
-}
-
-void BCGA::BaseBCGA::analyze_alikeness(int t)
-{
-    if(!is_fitted)
-        throw std::runtime_error("NotFittedError");
-    for(int i = 0; i < t; i++) {
-        int alike_counter = 0;
-        int example = -1;
-
-        for(int j = 0; j < population_size; j++) {
-            if(i == j)
-                continue;
-
-            bool flag = true;
-            for(int k = 0; k < n; k++)
-                if(population[i].genotype[k] != population[j].genotype[k]) {
-                    flag = false;
-                    break;
-                }
-
-            if(flag)
-                example = j;
-            alike_counter += flag;
-        }
-
-        std::cout << i << "th individual is like " << alike_counter << " others, " << "for example: " << example << std::endl;
-    }
-}
-
-void BCGA::BaseBCGA::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
-{
-    if(!is_fitted)
-        throw std::runtime_error("NotFittedError");
+    auto columns = get_best_individual().genotype;
     std::ofstream f;
     f.open(filename, std::ofstream::app);
-    f << fit_time << " " << fitness(M, get_best_individual()) << '\n';
+    for(int i = 0; i < n; i++)
+        if(columns[i])
+            f << i << ' ';
     f.close();
 }

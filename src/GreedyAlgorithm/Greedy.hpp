@@ -27,7 +27,7 @@ protected:
 public:
     void fit(BooleanMatrix::BooleanMatrix& M);
     void analyze();
-    void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename="results.txt");
+    void print_solution(std::string filename, int n);
 };
 
 class Greedy::EncodingGreedyAlgorithm: public Greedy::GreedyAlgorithm {

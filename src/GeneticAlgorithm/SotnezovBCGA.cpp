@@ -198,7 +198,7 @@ void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation
 {
     int number_of_mutations = K * (1.0 - 1.0 / (C * parameter + 1.0));
 
-    int genotype_len = population[0].size();
+    int genotype_len = M.get_n();
     int child_idx = population_size;
     std::uniform_int_distribution<> genes_d(0, genotype_len - 1);
 

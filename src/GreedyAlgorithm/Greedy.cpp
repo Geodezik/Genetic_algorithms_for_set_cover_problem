@@ -62,15 +62,17 @@ void Greedy::GreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
 void Greedy::GreedyAlgorithm::analyze()
 {
     std::cout << "Analyzing..." << std::endl;
-    std::cout << "Covering length: " << columns.count() << std::endl;
+    std::cout << "CovLen: " << columns.count() << std::endl;
 }
 
-void Greedy::GreedyAlgorithm::print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename)
+void Greedy::GreedyAlgorithm::print_solution(std::string filename, int n)
 {
-  std::ofstream f;
-  f.open(filename, std::ofstream::app);
-  f << fit_time << " " << columns.size() << '\n';
-  f.close();
+    std::ofstream f;
+    f.open(filename, std::ofstream::app);
+    for(int i = 0; i < n; i++)
+        if(columns[i])
+            f << i << ' ';
+    f.close();
 }
 
 Greedy::EncodingGreedyAlgorithm::EncodingGreedyAlgorithm(std::vector<int> features)
@@ -200,5 +202,5 @@ void Greedy::EncodingGreedyAlgorithm::analyze()
             enc_rank = it->second;
         //std::cout << it->first << ' ' << it->second << std::endl;
     }
-    std::cout << "Encoding rank: " << enc_rank << std::endl;
+    std::cout << "MaxBinsNum: " << enc_rank << std::endl;
 }

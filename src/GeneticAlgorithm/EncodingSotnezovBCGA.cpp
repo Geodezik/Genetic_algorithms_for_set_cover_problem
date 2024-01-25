@@ -88,6 +88,8 @@ void BCGA::EncSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, b
     std::vector<int> row_scores(m);
 
     for(int j = 0; j < n; j++) {
+        // bitset trick doesn't reduce time
+        // mb approximate this part somehow (hash???)
         if(!columns[j])
             continue;
         for(int i = 0; i < m; i++)

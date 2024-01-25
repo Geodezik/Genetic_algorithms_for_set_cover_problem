@@ -45,7 +45,6 @@ float BCGA::REncSotnezovBCGA::rank(BinaryIndividual& individual)
 
 void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
 {
-    throw std::out_of_range("Fuck"); // FIX THIS CLASS!
     population.clear();
     this->m = M.get_m();
     this->n = M.get_n();
@@ -61,20 +60,29 @@ void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix
 
         restore_solution(M, new_genes);
         population.push_back(BinaryIndividual(new_genes));
-        //optimize_covering(M, population[i].genotype);
 
-        int f = fitness(M, population[i]);
-        float r = rank(population[i]);
+        int cur_fitness = fitness(M, population[i]);
+        float cur_rank = rank(population[i]);
 
-        scores_sum += f; // meh but ok
-        individual_ranks[i] = r;
+        scores_sum += cur_fitness; // meh but ok
+        individual_ranks[i] = cur_rank;
 
-        if((f < best_score) || ((f == best_score) && (r > best_rank))) {
-            best_score = f;
+        if((cur_fitness < best_score) || ((cur_fitness == best_score) && (cur_rank > best_rank))) {
+            best_score = cur_fitness;
             best_index = i;
-            best_rank = r;
+            best_rank = cur_rank;
         }
     }
+
+    //count apriori_column_scores
+    column_scores = std::vector<int>();
+    for(int j = 0; j < n; j++) {
+        int s = 0;
+        for(int i = 0; i < m; i++)
+            s += M.get(i, j);
+        column_scores.push_back(s);
+    }
+    apriori_queue = argsort(column_scores);
 }
 
 void BCGA::REncSotnezovBCGA::update_scores(BooleanMatrix::BooleanMatrix& M)

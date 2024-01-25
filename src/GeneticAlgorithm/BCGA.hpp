@@ -83,10 +83,7 @@ public:
     void print_stats(std::vector<int>& argbest, int iteration);
 
     BinaryIndividual& get_best_individual();
-    void print_individuals();
-    void print_solution(BooleanMatrix::BooleanMatrix& M);
-    void analyze_alikeness(int t);
-    void print_fit_stats(BooleanMatrix::BooleanMatrix& M, std::string filename = GlobalSettings::default_out_filename);
+    void print_solution(std::string filename);
 
     virtual void analyze_solution(BooleanMatrix::BooleanMatrix& M) {};
 
