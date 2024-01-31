@@ -10,12 +10,12 @@ using namespace Greedy;
 
 int main()
 {
-    std::string filename = "../data/titanic_bool.csv";
+    std::string filename = "../../data/titanic_bool.csv";
     std::string results_filename = "./results.txt";
 
     // matrix size
-    int m = 12566;
-    int n = 806;
+    int m = 15456;
+    int n = 159;
 
     BooleanMatrix::BooleanMatrix M(m, n);
     std::vector<int> groups_idx = {}; // columns feature groups

@@ -202,5 +202,5 @@ void Greedy::EncodingGreedyAlgorithm::analyze()
             enc_rank = it->second;
         //std::cout << it->first << ' ' << it->second << std::endl;
     }
-    std::cout << "MaxBinsNum: " << enc_rank << std::endl;
+    std::cout << "MaxBinsNum: " << enc_rank + 1 << std::endl;
 }

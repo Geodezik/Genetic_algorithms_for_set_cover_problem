@@ -15,7 +15,7 @@ BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, doub
         throw std::invalid_argument("Wrong seed value");
 }
 
-void BCGA::BaseBCGA::print_stats(std::vector<int>& argbest, int iteration)
+void BCGA::BaseBCGA::print_stats(std::vector<int>& argbest)
 {
     switch(verbose) {
         case OutputMode::Silent:
@@ -64,8 +64,10 @@ void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M) {
     int delta = extended_population_size - population_size;
     int genotype_len = population[0].genotype.size();
 
-    // choose parents
     for(int i = 0; i < max_iter; i++) {
+        iteration = i;
+
+        // choose parents
         for(int j = 0; j < delta; j++) {
             int p1 = 0, p2 = 0;
             get_parent_indices(p1, p2);
@@ -74,13 +76,13 @@ void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M) {
         }
 
         //Mutate
-        mutate(M, mutation_proba, i);
+        mutate(M, mutation_proba);
 
         //Get scores for new individuals
         update_scores(M);
 
         //Selection
-        selection(i);
+        selection();
     }
 
     std::time_t finish = std::time(nullptr);

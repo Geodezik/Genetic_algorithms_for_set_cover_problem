@@ -52,6 +52,7 @@ protected:
     std::mt19937 rng;
 
     int max_iter;
+    int iteration;
     int population_size;
     int extended_population_size;
     int best_score = -1;
@@ -69,9 +70,9 @@ protected:
     virtual void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len) = 0;
     virtual void get_parent_indices(int& p1, int& p2) = 0;
     virtual BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2) = 0;
-    virtual void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter) = 0;
+    virtual void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba) = 0;
     virtual int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual) = 0;
-    virtual void selection(int iteration) = 0;
+    virtual void selection() = 0;
 
     virtual void update_scores(BooleanMatrix::BooleanMatrix& M);
     virtual void check_compatibility() {};
@@ -80,7 +81,7 @@ public:
              int seed = -1, OutputMode verbose = OutputMode::Normal);
 
     void fit(BooleanMatrix::BooleanMatrix& M);
-    void print_stats(std::vector<int>& argbest, int iteration);
+    void print_stats(std::vector<int>& argbest);
 
     BinaryIndividual& get_best_individual();
     void print_solution(std::string filename);
@@ -104,9 +105,9 @@ protected:
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
     void get_parent_indices(int& p1, int& p2);
     BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2);
-    void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter);
+    void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba);
     int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
-    void selection(int iteration);
+    void selection();
 
     virtual void optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
     virtual std::vector<bool> get_covered_rows(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
@@ -150,15 +151,18 @@ class BCGA::REncSotnezovBCGA: public BCGA::EncSotnezovBCGA {
 
     RankType rank_type;
     float best_rank;
+    float alpha;
+    int norank_iter;
 
+    BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2);
     float rank(BinaryIndividual& individual);
 
     void update_scores(BooleanMatrix::BooleanMatrix& M);
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
-    void selection(int iteration);
+    void selection();
 public:
     REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<float> ranks, RankType rank_type = RankType::ElementWise, Fitness optimize = Fitness::CovLen,
-                     int K = 100, float C = 0.01, int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
+                     int K = 100, float C = 0.01, float alpha = 0.2, int max_iter = 100, int norank_iter = 0, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 };
 
 #endif

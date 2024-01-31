@@ -159,23 +159,18 @@ BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, 
     boost::dynamic_bitset<> new_genotype;
 
     //build probs
-    double rel_sum = scores_sum - (best_score - 1) * population_size;
-    if (rel_sum <= 0) {
-        std::cout << "WARNING: REL_SUM = 1" << std::endl;
-        rel_sum = 1;
-    }
     std::vector<double> probs;
     for(int i = 0; i < population_size; i++) {
-        int rel_score = scores[i] - best_score + 1;
-        probs.push_back((1.0 / rel_score) / rel_sum);
+        double inv_rel_score = 1.0 / (scores[i] - best_score + 1);
+        probs.push_back(inv_rel_score);
     }
 
     // sample two parents
     std::discrete_distribution<> distr(probs.begin(), probs.end());
     int p1 = distr(rng);
     int p2 = distr(rng);
-    int f1 = scores[p1] - best_score + 1;
-    int f2 = scores[p2] - best_score + 1;
+    double f1 = scores[p1] - best_score + 1;
+    double f2 = scores[p2] - best_score + 1;
     double p = f2 / (f1 + f2);
     std::bernoulli_distribution bd(p);
 
@@ -194,9 +189,9 @@ BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, 
     return BinaryIndividual(new_genotype);
 }
 
-void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba, int parameter)
+void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba)
 {
-    int number_of_mutations = K * (1.0 - 1.0 / (C * parameter + 1.0));
+    int number_of_mutations = K * (1.0 - 1.0 / (C * iteration + 1.0));
 
     int genotype_len = M.get_n();
     int child_idx = population_size;
@@ -220,7 +215,7 @@ int BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryInd
     return ones_counter;
 }
 
-void BCGA::SotnezovBCGA::selection(int iteration)
+void BCGA::SotnezovBCGA::selection()
 {
     int child_score = scores[population_size];
     bool child_in_population = false;

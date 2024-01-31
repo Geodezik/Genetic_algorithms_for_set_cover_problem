@@ -1,10 +1,14 @@
 #include "BCGA.hpp"
 
-BCGA::REncSotnezovBCGA::REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<float> ranks, RankType rank_type, Fitness optimize, int K, float C, int max_iter, int seed, OutputMode verbose):
+BCGA::REncSotnezovBCGA::REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<float> ranks, RankType rank_type, Fitness optimize, int K, float C, float alpha, int max_iter, int norank_iter, int seed, OutputMode verbose):
                                          BCGA::EncSotnezovBCGA(population_size, groups_idx, optimize, K, C, max_iter, seed, verbose)
 {
     this->columns_ranks = ranks;
     this->rank_type = rank_type;
+    this->norank_iter = norank_iter;
+    this->alpha = alpha;
+    if((alpha < 0.0) || (alpha > 1.0))
+        throw std::out_of_range("Invalid alpha value");
     this->individual_ranks = std::vector<float>(extended_population_size);
 }
 
@@ -67,7 +71,7 @@ void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix
         scores_sum += cur_fitness; // meh but ok
         individual_ranks[i] = cur_rank;
 
-        if((cur_fitness < best_score) || ((cur_fitness == best_score) && (cur_rank > best_rank))) {
+        if((cur_fitness < best_score) || ((cur_fitness == best_score) && (cur_rank < best_rank))) {
             best_score = cur_fitness;
             best_index = i;
             best_rank = cur_rank;
@@ -93,15 +97,62 @@ void BCGA::REncSotnezovBCGA::update_scores(BooleanMatrix::BooleanMatrix& M)
     }
 }
 
-void BCGA::REncSotnezovBCGA::selection(int iteration)
+BCGA::BinaryIndividual BCGA::REncSotnezovBCGA::crossover(BinaryIndividual& parent1, BinaryIndividual& parent2)
+{
+    boost::dynamic_bitset<> new_genotype;
+    double beta = alpha * (iteration >= norank_iter);
+
+    //build probs
+    std::vector<double> rank_probs;
+    std::vector<double> scores_probs;
+    std::vector<double> probs;
+    double inv_score_sum = 0.0;
+    double inv_rank_sum = 0.0;
+    for(int i = 0; i < population_size; i++) {
+        double inv_rel_rank = 1.0 / (individual_ranks[i]);
+        double inv_rel_score = 1.0 / (scores[i] - best_score + 1);
+        inv_rank_sum += inv_rel_rank;
+        inv_score_sum += inv_rel_score;
+        rank_probs.push_back(inv_rel_rank);
+        scores_probs.push_back(inv_rel_score);
+    }
+    for(int i = 0; i < population_size; i++)
+        probs.push_back(beta * rank_probs[i] / inv_rank_sum + (1 - beta) * scores_probs[i] / inv_score_sum);
+
+    // sample two parents
+    std::discrete_distribution<> distr(probs.begin(), probs.end());
+    int p1 = distr(rng);
+    int p2 = distr(rng);
+    double r1 = individual_ranks[p1];
+    double r2 = individual_ranks[p2];
+    double f1 = scores[p1] - best_score + 1;
+    double f2 = scores[p2] - best_score + 1;
+    double prob1 = beta * (r2 / (r1 + r2));
+    double prob2 = (1 - beta) * (f2 / (f1 + f2));
+    double p = prob1 + prob2;
+    std::bernoulli_distribution bd(p);
+
+    // create set of genes
+    for(int i = 0; i < n; i++) {
+        if(population[p1].genotype[i] == population[p2].genotype[i]) {
+            new_genotype.push_back(population[p1].genotype[i]);
+            continue;
+        }
+        if(bd(rng))
+            new_genotype.push_back(population[p1].genotype[i]);
+        else
+            new_genotype.push_back(population[p2].genotype[i]);
+    }
+
+    return BinaryIndividual(new_genotype);
+}
+
+void BCGA::REncSotnezovBCGA::selection()
 {
     int child_score = scores[population_size];
     float child_rank = individual_ranks[population_size];
     bool child_in_population = false;
-    bool hit_by_child = ((child_score < best_score) || ((child_score == best_score) && (child_rank > best_rank)));
-
-    //if(((child_score == best_score) && (child_rank > best_rank)))
-        //std::cout << "!!!!!!!!!!!!!!!!!!!" << std::endl;
+    bool hit_by_child = ((child_score < best_score) || ((child_score == best_score) && (child_rank < best_rank)));
 
     if(hit_by_child) {
         best_score = child_score;
@@ -134,9 +185,15 @@ void BCGA::REncSotnezovBCGA::selection(int iteration)
 
     // find all the worse individuals indices
     std::vector<int> worse;
-    for(int i = 0; i < population_size; i++)
-        if((child_score < scores[i]) || ((child_score == scores[i]) && (child_rank > individual_ranks[i])))
-            worse.push_back(i);
+    if(iteration >= norank_iter) {
+        for(int i = 0; i < population_size; i++)
+            if((child_score < scores[i]) || ((child_score == scores[i]) && (child_rank < individual_ranks[i])))
+                worse.push_back(i);
+    } else {
+        for(int i = 0; i < population_size; i++)
+            if(child_score < scores[i])
+                worse.push_back(i);
+    }
 
     // track cases when child should NOT be included
     bool bad_child = (worse.size() == 0);
