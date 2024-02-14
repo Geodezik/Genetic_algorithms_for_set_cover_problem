@@ -1,6 +1,6 @@
 #include "BCGA.hpp"
 
-std::vector<int> BCGA::EncSotnezovBCGA::conditional_argsort(const std::vector<int> &v, const std::vector<int> &c) {
+std::vector<int> BCGA::EncSotnezovBCGA::conditional_argsort(const std::vector<int> &v, const std::vector<double> &c) {
     //Argsort, but for equal values: bigger c => earlier
     std::vector<int> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
@@ -25,7 +25,7 @@ std::vector<int> BCGA::EncSotnezovBCGA::enc_conditional_argsort(const std::vecto
     return idx;
 }
 
-BCGA::EncSotnezovBCGA::EncSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize, int K, float C, int max_iter, int seed, OutputMode verbose): BCGA::SotnezovBCGA(
+BCGA::EncSotnezovBCGA::EncSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize, int K, double C, int max_iter, int seed, OutputMode verbose): BCGA::SotnezovBCGA(
                                                  population_size, K, C, max_iter, seed, verbose)
 {
     this->groups_idx = groups_idx;
@@ -67,10 +67,10 @@ void BCGA::EncSotnezovBCGA::fill_counters(BooleanMatrix::BooleanMatrix& M, boost
             group_counters[group] += columns[j];
 }
 
-std::vector<int> BCGA::EncSotnezovBCGA::build_decreasing_counters(boost::dynamic_bitset<>& columns, std::vector<int>& columns_argsort)
+std::vector<double> BCGA::EncSotnezovBCGA::build_decreasing_counters(boost::dynamic_bitset<>& columns, std::vector<int>& columns_argsort)
 {
     std::vector<int> group_counters_copy = group_counters;
-    std::vector<int> decreasing_group_counters(n);
+    std::vector<double> decreasing_group_counters(n);
 
     for(auto idx: columns_argsort) {
         group_counters_copy[columns_groups[idx]] -= columns[idx];
@@ -98,7 +98,7 @@ void BCGA::EncSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, b
 
     // iterate through columns (from worst to best), exclude if can
     std::vector<int> queue;
-    std::vector<int> decreasing_group_counters;
+    std::vector<double> decreasing_group_counters;
 
     // Very easy
     switch(fit_function) {

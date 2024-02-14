@@ -1,6 +1,6 @@
 #include "BCGA.hpp"
 
-BCGA::REncSotnezovBCGA::REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<float> ranks, RankType rank_type, Fitness optimize, int K, float C, float alpha, int max_iter, int norank_iter, int seed, OutputMode verbose):
+BCGA::REncSotnezovBCGA::REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<double> ranks, RankType rank_type, Fitness optimize, int K, double C, double alpha, int max_iter, int norank_iter, int seed, OutputMode verbose):
                                          BCGA::EncSotnezovBCGA(population_size, groups_idx, optimize, K, C, max_iter, seed, verbose)
 {
     this->columns_ranks = ranks;
@@ -9,14 +9,14 @@ BCGA::REncSotnezovBCGA::REncSotnezovBCGA(int population_size, std::vector<int> g
     this->alpha = alpha;
     if((alpha < 0.0) || (alpha > 1.0))
         throw std::out_of_range("Invalid alpha value");
-    this->individual_ranks = std::vector<float>(extended_population_size);
+    this->individual_ranks = std::vector<double>(extended_population_size);
 }
 
-float BCGA::REncSotnezovBCGA::rank(BinaryIndividual& individual)
+double BCGA::REncSotnezovBCGA::rank(BinaryIndividual& individual)
 {
     switch(rank_type) {
         case RankType::ElementWise: {
-            float ind_rank = 0.0;
+            double ind_rank = 0.0;
             int cov_len = 0;
             for(int i = 0; i < n; i++) {
                 if(!individual.genotype[i])
@@ -26,9 +26,9 @@ float BCGA::REncSotnezovBCGA::rank(BinaryIndividual& individual)
             }
             return ind_rank / cov_len;
         } case RankType::GroupWise: {
-            float ind_rank = 0.0;
+            double ind_rank = 0.0;
             for(int group = 0; group < groups_idx.size() - 1; group++) {
-                float group_sum_rank = 0.0;
+                double group_sum_rank = 0.0;
                 int intersection_len = 0;
                 for(int i = groups_idx[group]; i < groups_idx[group + 1]; i++) {
                     if(!individual.genotype[i])
@@ -39,6 +39,14 @@ float BCGA::REncSotnezovBCGA::rank(BinaryIndividual& individual)
                 ind_rank += group_sum_rank / intersection_len;
             }
             return ind_rank / (groups_idx.size() - 1);
+        } case RankType::Sum: {
+            double ind_rank = 0.0;
+            for(int i = 0; i < n; i++) {
+                if(!individual.genotype[i])
+                    continue;
+                ind_rank += columns_ranks[i];
+            }
+            return ind_rank;
         } default:
             throw std::invalid_argument("Unknown rank function in rank call");
     }
@@ -66,7 +74,7 @@ void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix
         population.push_back(BinaryIndividual(new_genes));
 
         int cur_fitness = fitness(M, population[i]);
-        float cur_rank = rank(population[i]);
+        double cur_rank = rank(population[i]);
 
         scores_sum += cur_fitness; // meh but ok
         individual_ranks[i] = cur_rank;
@@ -86,6 +94,9 @@ void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix
             s += M.get(i, j);
         column_scores.push_back(s);
     }
+
+    // commented doesn't work well...
+    //apriori_queue = conditional_argsort(column_scores, individual_ranks);
     apriori_queue = argsort(column_scores);
 }
 
@@ -150,7 +161,7 @@ BCGA::BinaryIndividual BCGA::REncSotnezovBCGA::crossover(BinaryIndividual& paren
 void BCGA::REncSotnezovBCGA::selection()
 {
     int child_score = scores[population_size];
-    float child_rank = individual_ranks[population_size];
+    double child_rank = individual_ranks[population_size];
     bool child_in_population = false;
     bool hit_by_child = ((child_score < best_score) || ((child_score == best_score) && (child_rank < best_rank)));
 

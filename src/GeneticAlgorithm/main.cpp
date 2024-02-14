@@ -9,32 +9,35 @@
 
 using namespace BCGA;
 
-int main()
+int main(int argc, char* argv[])
 {
-    std::string filename = "../../data/titanic_bool.csv";
-    std::string results_filename = "./results.txt";
+    std::string filename = "./data/bool.csv";
+    std::string ranks_filename = "./data/ranks.csv";
+    std::string results_filename = "./data/results.txt";
 
     // matrix size
-    int m = 15456;
-    int n = 159;
+    int m = std::atoi(argv[1]);
+    int n = std::atoi(argv[2]);
 
     // Sotnezov's mutation parameters
-    int K = n / 2;
-    float C = 0.01;
-    float alpha = 0.2;
+    int K = n / 5;
+    double C = 0.001;
+    double alpha = 0.2;
 
     // GA parameters
     int population_size = 25;
-    int max_iter = 250;
+    int max_iter = 1000;
     int norank_iter = max_iter / 2;
     int seed = 42;
 
     BooleanMatrix::BooleanMatrix M(m, n);
     std::vector<int> groups_idx = {}; // columns feature groups
-    std::vector<float> ranks(n);
-    std::generate(ranks.begin(), ranks.end(), std::rand); // generate random ranks
+    std::vector<double> ranks;
+    //std::generate(ranks.begin(), ranks.end(), std::rand); // generate random ranks
+    read_ranks(ranks_filename, ranks);
     std::vector<std::pair<int, std::vector<bool>>> csv_data = read_csv(filename);
     fill_matrix(M, csv_data, groups_idx);
+
 
     /*
     ALGORITHMS COMMENTS
@@ -47,9 +50,29 @@ int main()
     RankType: ElementWise or GroupWise. Group or column-wise rank mean.
     */
 
+    RankType rank_function;
+    if(std::string(argv[3]) == "elementwise")
+        rank_function = RankType::ElementWise;
+    else if(std::string(argv[3]) == "groupwise")
+        rank_function = RankType::GroupWise;
+    else if(std::string(argv[3]) == "sum")
+        rank_function = RankType::Sum;
+    else
+        throw std::invalid_argument("Wrong rank function");
+
+    Fitness fitness_function;
+    if(std::string(argv[4]) == "covlen")
+        fitness_function = Fitness::CovLen;
+    else if(std::string(argv[4]) == "maxbinsnum")
+        fitness_function = Fitness::MaxBinsNum;
+    else if(std::string(argv[4]) == "mixed")
+        fitness_function = Fitness::Mixed;
+    else
+        throw std::invalid_argument("Wrong fitness function");
+
     //SotnezovBCGA A = SotnezovBCGA(population_size, K, C, max_iter, seed, OutputMode::Max);
     //EncSotnezovBCGA A = EncSotnezovBCGA(population_size, groups_idx, Fitness::MaxBinsNum, K, C, max_iter, seed, OutputMode::Max);
-    REncSotnezovBCGA A = REncSotnezovBCGA(population_size, groups_idx, ranks, RankType::ElementWise, Fitness::MaxBinsNum, K, C, alpha, max_iter, norank_iter, seed, OutputMode::Max);
+    REncSotnezovBCGA A = REncSotnezovBCGA(population_size, groups_idx, ranks, rank_function, fitness_function, K, C, alpha, max_iter, norank_iter, seed, OutputMode::Silent);
 
     A.fit(M);
     A.print_solution(results_filename);

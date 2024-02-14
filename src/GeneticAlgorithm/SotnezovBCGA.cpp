@@ -11,7 +11,7 @@ std::vector<int> BCGA::SotnezovBCGA::argsort(const std::vector<int>& v) {
     return idx;
 }
 
-BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int K, float C, int max_iter, int seed, OutputMode verbose): BCGA::BaseBCGA(population_size,
+BCGA::SotnezovBCGA::SotnezovBCGA(int population_size, int K, double C, int max_iter, int seed, OutputMode verbose): BCGA::BaseBCGA(population_size,
                                  population_size + 1, 1.0, max_iter, seed, verbose)
 {
     if((K <= 0) || (C <= 0.0))
@@ -172,6 +172,7 @@ BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, 
     double f1 = scores[p1] - best_score + 1;
     double f2 = scores[p2] - best_score + 1;
     double p = f2 / (f1 + f2);
+    //std::cout << f1 << ' ' << f2 << ' ' << p << std::endl;
     std::bernoulli_distribution bd(p);
 
     // create set of genes
@@ -192,6 +193,7 @@ BCGA::BinaryIndividual BCGA::SotnezovBCGA::crossover(BinaryIndividual& parent1, 
 void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba)
 {
     int number_of_mutations = K * (1.0 - 1.0 / (C * iteration + 1.0));
+    //std::cout << number_of_mutations << std::endl;
 
     int genotype_len = M.get_n();
     int child_idx = population_size;

@@ -111,7 +111,7 @@ void BCGA::BaseBCGA::print_solution(std::string filename)
         throw std::runtime_error("NotFittedError");
     auto columns = get_best_individual().genotype;
     std::ofstream f;
-    f.open(filename, std::ofstream::app);
+    f.open(filename);
     for(int i = 0; i < n; i++)
         if(columns[i])
             f << i << ' ';

@@ -12,7 +12,6 @@ std::vector<std::pair<int, std::vector<bool>>> read_csv(std::string filename){
     std::vector<std::pair<int, std::vector<bool>>> result;
 
     std::ifstream myFile(filename);
-
     if(!myFile.is_open()) throw std::runtime_error("Could not open file");
 
     std::string line, colname;
@@ -71,4 +70,28 @@ void fill_matrix(BooleanMatrix::BooleanMatrix &M, std::vector<std::pair<int, std
         if(row_sum == 0)
             throw std::runtime_error("Incorrect matrix or csv format");
     }
+}
+
+void read_ranks(std::string filename, std::vector<double> &ranks)
+{
+    std::ifstream myFile(filename);
+    if(!myFile.is_open()) throw std::runtime_error("Could not open ranks file");
+
+    std::string line;
+    double val;
+
+    std::getline(myFile, line);
+    std::stringstream ss(line);
+    int colIdx = 0;
+
+    while(ss >> val) {
+        ranks.push_back(val);
+        if(ss.peek() == ',') ss.ignore();
+        colIdx++;
+    }
+
+    //for(auto elem: ranks)
+        //std::cout << elem << std::endl;
+
+    myFile.close();
 }
