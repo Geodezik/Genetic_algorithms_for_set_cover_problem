@@ -1,6 +1,6 @@
 #include "BCGA.hpp"
 
-std::vector<int> BCGA::EncSotnezovBCGA::conditional_argsort(const std::vector<int> &v, const std::vector<double> &c) {
+std::vector<int> BCGA::GENCODE::conditional_argsort(const std::vector<int> &v, const std::vector<double> &c) {
     //Argsort, but for equal values: bigger c => earlier
     std::vector<int> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
@@ -11,7 +11,7 @@ std::vector<int> BCGA::EncSotnezovBCGA::conditional_argsort(const std::vector<in
     return idx;
 }
 
-std::vector<int> BCGA::EncSotnezovBCGA::enc_conditional_argsort(const std::vector<int> &v) {
+std::vector<int> BCGA::GENCODE::enc_conditional_argsort(const std::vector<int> &v) {
     //Argsort, but for equal values: bigger c => earlier
     std::vector<int> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
@@ -25,7 +25,7 @@ std::vector<int> BCGA::EncSotnezovBCGA::enc_conditional_argsort(const std::vecto
     return idx;
 }
 
-BCGA::EncSotnezovBCGA::EncSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize, int K, double C, int max_iter, int seed, OutputMode verbose): BCGA::SotnezovBCGA(
+BCGA::GENCODE::GENCODE(int population_size, std::vector<int> groups_idx, Fitness optimize, int K, double C, int max_iter, int seed, OutputMode verbose): BCGA::SotnezovBCGA(
                                                  population_size, K, C, max_iter, seed, verbose)
 {
     this->groups_idx = groups_idx;
@@ -33,7 +33,7 @@ BCGA::EncSotnezovBCGA::EncSotnezovBCGA(int population_size, std::vector<int> gro
     this->fit_function = optimize;
 }
 
-void BCGA::EncSotnezovBCGA::check_compatibility()
+void BCGA::GENCODE::check_compatibility()
 {
     if((groups_idx.size() == 0) || (groups_idx.size() > n))
         throw std::out_of_range("Wrong number of group's indices was given");
@@ -57,7 +57,7 @@ void BCGA::EncSotnezovBCGA::check_compatibility()
             columns_groups[j] = group;  
 }
 
-void BCGA::EncSotnezovBCGA::fill_counters(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
+void BCGA::GENCODE::fill_counters(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     for(int i = 0; i < group_counters.size(); i++)
         group_counters[i] = 0;
@@ -67,7 +67,7 @@ void BCGA::EncSotnezovBCGA::fill_counters(BooleanMatrix::BooleanMatrix& M, boost
             group_counters[group] += columns[j];
 }
 
-std::vector<double> BCGA::EncSotnezovBCGA::build_decreasing_counters(boost::dynamic_bitset<>& columns, std::vector<int>& columns_argsort)
+std::vector<double> BCGA::GENCODE::build_decreasing_counters(boost::dynamic_bitset<>& columns, std::vector<int>& columns_argsort)
 {
     std::vector<int> group_counters_copy = group_counters;
     std::vector<double> decreasing_group_counters(n);
@@ -80,7 +80,7 @@ std::vector<double> BCGA::EncSotnezovBCGA::build_decreasing_counters(boost::dyna
     return decreasing_group_counters;
 }
 
-void BCGA::EncSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
+void BCGA::GENCODE::optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     fill_counters(M, columns);
 
@@ -153,7 +153,7 @@ void BCGA::EncSotnezovBCGA::optimize_covering(BooleanMatrix::BooleanMatrix& M, b
     }
 }
 
-void BCGA::EncSotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
+void BCGA::GENCODE::restore_solution(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     std::vector<bool> covered_rows = get_covered_rows(M, columns);
 
@@ -177,7 +177,7 @@ void BCGA::EncSotnezovBCGA::restore_solution(BooleanMatrix::BooleanMatrix& M, bo
     }
 }
 
-int BCGA::EncSotnezovBCGA::covlen_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+int BCGA::GENCODE::covlen_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int ones_counter = 0;
     for(int i = 0; i < individual.size(); i++)
@@ -187,7 +187,7 @@ int BCGA::EncSotnezovBCGA::covlen_fitness(BooleanMatrix::BooleanMatrix& M, BCGA:
     return ones_counter;
 }
 
-int BCGA::EncSotnezovBCGA::maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+int BCGA::GENCODE::maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     fill_counters(M, individual.genotype);
     int max_bin_num = 0;
@@ -197,14 +197,14 @@ int BCGA::EncSotnezovBCGA::maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, B
     return max_bin_num + 1;
 }
 
-int BCGA::EncSotnezovBCGA::mixed_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+int BCGA::GENCODE::mixed_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int maxbinsnum = maxbinsnum_fitness(M, individual);
     int covlen = covlen_fitness(M, individual);
     return maxbinsnum + covlen / (groups_idx.size() - 1);
 }
 
-int BCGA::EncSotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+int BCGA::GENCODE::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     switch(fit_function) {
         case Fitness::CovLen:
@@ -221,7 +221,7 @@ int BCGA::EncSotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::Binary
     return 0;
 }
 
-void BCGA::EncSotnezovBCGA::analyze_solution(BooleanMatrix::BooleanMatrix& M)
+void BCGA::GENCODE::analyze_solution(BooleanMatrix::BooleanMatrix& M)
 {
     if(!is_fitted)
         throw std::runtime_error("NotFittedError");

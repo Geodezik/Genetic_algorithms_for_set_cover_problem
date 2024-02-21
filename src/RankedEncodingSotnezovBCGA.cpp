@@ -1,7 +1,7 @@
 #include "BCGA.hpp"
 
-BCGA::REncSotnezovBCGA::REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<double> ranks, RankType rank_type, Fitness optimize, int K, double C, double alpha, int max_iter, int norank_iter, int seed, OutputMode verbose):
-                                         BCGA::EncSotnezovBCGA(population_size, groups_idx, optimize, K, C, max_iter, seed, verbose)
+BCGA::GENCODE_plus::GENCODE_plus(int population_size, std::vector<int> groups_idx, std::vector<double> ranks, RankType rank_type, Fitness optimize, int K, double C, double alpha, int max_iter, int norank_iter, int seed, OutputMode verbose):
+                                         BCGA::GENCODE(population_size, groups_idx, optimize, K, C, max_iter, seed, verbose)
 {
     this->columns_ranks = ranks;
     this->rank_type = rank_type;
@@ -12,7 +12,7 @@ BCGA::REncSotnezovBCGA::REncSotnezovBCGA(int population_size, std::vector<int> g
     this->individual_ranks = std::vector<double>(extended_population_size);
 }
 
-double BCGA::REncSotnezovBCGA::rank(BinaryIndividual& individual)
+double BCGA::GENCODE_plus::rank(BinaryIndividual& individual)
 {
     switch(rank_type) {
         case RankType::ElementWise: {
@@ -55,7 +55,7 @@ double BCGA::REncSotnezovBCGA::rank(BinaryIndividual& individual)
     return 0;
 }
 
-void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
+void BCGA::GENCODE_plus::create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len)
 {
     population.clear();
     this->m = M.get_m();
@@ -100,7 +100,7 @@ void BCGA::REncSotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix
     apriori_queue = argsort(column_scores);
 }
 
-void BCGA::REncSotnezovBCGA::update_scores(BooleanMatrix::BooleanMatrix& M)
+void BCGA::GENCODE_plus::update_scores(BooleanMatrix::BooleanMatrix& M)
 {
     for(int j = population_size; j < extended_population_size; j++) {
         scores[j] = fitness(M, population[j]);
@@ -108,7 +108,7 @@ void BCGA::REncSotnezovBCGA::update_scores(BooleanMatrix::BooleanMatrix& M)
     }
 }
 
-BCGA::BinaryIndividual BCGA::REncSotnezovBCGA::crossover(BinaryIndividual& parent1, BinaryIndividual& parent2)
+BCGA::BinaryIndividual BCGA::GENCODE_plus::crossover(BinaryIndividual& parent1, BinaryIndividual& parent2)
 {
     boost::dynamic_bitset<> new_genotype;
     double beta = alpha * (iteration >= norank_iter);
@@ -158,7 +158,7 @@ BCGA::BinaryIndividual BCGA::REncSotnezovBCGA::crossover(BinaryIndividual& paren
     return BinaryIndividual(new_genotype);
 }
 
-void BCGA::REncSotnezovBCGA::selection()
+void BCGA::GENCODE_plus::selection()
 {
     int child_score = scores[population_size];
     double child_rank = individual_ranks[population_size];

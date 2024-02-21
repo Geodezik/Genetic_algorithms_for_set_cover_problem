@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     std::vector<int> groups_idx = {}; // columns feature groups
     std::vector<double> ranks;
     //std::generate(ranks.begin(), ranks.end(), std::rand); // generate random ranks
-    read_ranks(ranks_filename, ranks);
+    //read_ranks(ranks_filename, ranks);
     std::vector<std::pair<int, std::vector<bool>>> csv_data = read_csv(filename);
     fill_matrix(M, csv_data, groups_idx);
 
@@ -74,11 +74,11 @@ int main(int argc, char* argv[])
     //SotnezovBCGA A = SotnezovBCGA(population_size, K, C, max_iter, seed, OutputMode::Max);
     //EncSotnezovBCGA A = EncSotnezovBCGA(population_size, groups_idx, Fitness::MaxBinsNum, K, C, max_iter, seed, OutputMode::Max);
     if(std::string(argv[6]) == "gencode+") {
-        REncSotnezovBCGA A = REncSotnezovBCGA(population_size, groups_idx, ranks, rank_function, fitness_function, K, C, alpha, max_iter, norank_iter, seed, OutputMode::Max);
+        GENCODE_plus A = GENCODE_plus(population_size, groups_idx, ranks, rank_function, fitness_function, K, C, alpha, max_iter, norank_iter, seed, OutputMode::Max);
         A.fit(M);
         A.print_solution(results_filename);
     } else if(std::string(argv[6]) == "gencode") {
-        EncSotnezovBCGA A = EncSotnezovBCGA(population_size, groups_idx, Fitness::MaxBinsNum, K, C, max_iter, seed, OutputMode::Max);
+        GENCODE A = GENCODE(population_size, groups_idx, Fitness::MaxBinsNum, K, C, max_iter, seed, OutputMode::Max);
         A.fit(M);
         A.print_solution(results_filename);
     } else if(std::string(argv[6]) == "greedy") {

@@ -16,8 +16,8 @@
 namespace BCGA {
     class BaseBCGA;
     class SotnezovBCGA;
-    class EncSotnezovBCGA;
-    class REncSotnezovBCGA;
+    class GENCODE;
+    class GENCODE_plus;
     class BinaryIndividual;
 
     enum class OutputMode {Silent, Normal, Max};
@@ -120,7 +120,7 @@ public:
     void print_columns_to_file(std::string filename);
 };
 
-class BCGA::EncSotnezovBCGA: public BCGA::SotnezovBCGA {
+class BCGA::GENCODE: public BCGA::SotnezovBCGA {
 protected:
     Fitness fit_function = Fitness::CovLen;
     std::vector<int> groups_idx;
@@ -141,13 +141,13 @@ protected:
     int mixed_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
 public:
-    EncSotnezovBCGA(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, double C = 0.01,
+    GENCODE(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, double C = 0.01,
                          int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
 };
 
-class BCGA::REncSotnezovBCGA: public BCGA::EncSotnezovBCGA {
+class BCGA::GENCODE_plus: public BCGA::GENCODE {
     std::vector<double> columns_ranks;
     std::vector<double> individual_ranks;
 
@@ -163,7 +163,7 @@ class BCGA::REncSotnezovBCGA: public BCGA::EncSotnezovBCGA {
     void create_zero_generation(BooleanMatrix::BooleanMatrix& M, int genotype_len);
     void selection();
 public:
-    REncSotnezovBCGA(int population_size, std::vector<int> groups_idx, std::vector<double> ranks, RankType rank_type = RankType::ElementWise, Fitness optimize = Fitness::CovLen,
+    GENCODE_plus(int population_size, std::vector<int> groups_idx, std::vector<double> ranks, RankType rank_type = RankType::ElementWise, Fitness optimize = Fitness::CovLen,
                      int K = 100, double C = 0.01, double alpha = 0.2, int max_iter = 100, int norank_iter = 0, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 };
 
