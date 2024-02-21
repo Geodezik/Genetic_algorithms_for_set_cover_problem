@@ -68,7 +68,7 @@ void Greedy::GreedyAlgorithm::analyze()
 void Greedy::GreedyAlgorithm::print_solution(std::string filename, int n)
 {
     std::ofstream f;
-    f.open(filename, std::ofstream::app);
+    f.open(filename);
     for(int i = 0; i < n; i++)
         if(columns[i])
             f << i << ' ';
@@ -153,6 +153,16 @@ void Greedy::EncodingGreedyAlgorithm::fit(BooleanMatrix::BooleanMatrix& M)
     std::time_t start = std::time(nullptr);
     int m = M.get_m();
     int n = M.get_n();
+
+    std::vector<int> new_features;
+    int cur_feature = 0;
+    features.push_back(n);
+    for(int i = 0; i < features.size() - 1; i++) {
+        for(int j = features[i]; j < features[i + 1]; j++)
+            new_features.push_back(cur_feature);
+        cur_feature++;
+    }
+    features = new_features;
 
     if(features.size() != n)
         throw std::out_of_range("Feature vector is invalid for the given matrix");
