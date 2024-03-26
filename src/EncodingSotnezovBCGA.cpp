@@ -44,7 +44,7 @@ void BCGA::GENCODE::check_compatibility()
         if(idx <= max_idx)
             throw std::invalid_argument("Some of group indices are given in a wrong order");
         else if((idx < 0) || (idx >= n))
-            throw std::out_of_range("Found wrond index (idx <= 0) or (idx >= n)");
+            throw std::out_of_range("Found wrong index (idx <= 0) or (idx >= n)");
         max_idx = idx;
     }
 
@@ -83,24 +83,18 @@ std::vector<double> BCGA::GENCODE::build_decreasing_counters(boost::dynamic_bits
 void BCGA::GENCODE::optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns)
 {
     fill_counters(M, columns);
-
-    // HARDEST PART!!!!!!!
     std::vector<int> row_scores(m);
 
-    for(int j = 0; j < n; j++) {
-        // bitset trick doesn't reduce time
-        // mb approximate this part somehow (hash???)
-        if(!columns[j])
-            continue;
-        for(int i = 0; i < m; i++)
-            row_scores[i] += M.get(i, j);
+    boost::dynamic_bitset<> bad_rows = boost::dynamic_bitset<>(m, 0);
+    for(int i = 0; i < m; i++) {
+        row_scores[i] = (M.rows[i] & columns).count();
+        bad_rows[i] = (row_scores[i] <= 1);
     }
 
     // iterate through columns (from worst to best), exclude if can
     std::vector<int> queue;
     std::vector<double> decreasing_group_counters;
 
-    // Very easy
     switch(fit_function) {
         case Fitness::CovLen:
             queue = apriori_queue;
@@ -130,26 +124,17 @@ void BCGA::GENCODE::optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dy
             continue;
         }
 
-        bool flag = true;
-        std::vector<int> row_scores_copy = row_scores;
-        for(int j = 0; j < m; j++) {
-            if(M.get(j, queue[i]) && (row_scores[j] < GlobalSettings::SotnezovThreshold)) {
-                flag = false;
-                break;
-            }
-            row_scores_copy[j] -= M.get(j, queue[i]);
-        }
-
-        if(!flag) 
+        if((bad_rows & M.columns[queue[i]]).any())
             continue;
 
         columns[queue[i]] = false;
         group_counters[columns_groups[queue[i]]]--;
 
         // Decrease scores
-        //for(int j = 0; j < m; j++)
-            //row_scores[j] -= M.get(j, queue[i]);
-        row_scores = row_scores_copy;
+        for(int j = 0; j < m; j++) {
+            row_scores[j] -= M.get(j, queue[i]);
+            bad_rows[j] = (row_scores[j] <= 1);
+        }
     }
 }
 
@@ -177,7 +162,7 @@ void BCGA::GENCODE::restore_solution(BooleanMatrix::BooleanMatrix& M, boost::dyn
     }
 }
 
-int BCGA::GENCODE::covlen_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+double BCGA::GENCODE::covlen_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int ones_counter = 0;
     for(int i = 0; i < individual.size(); i++)
@@ -187,7 +172,7 @@ int BCGA::GENCODE::covlen_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryI
     return ones_counter;
 }
 
-int BCGA::GENCODE::maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+double BCGA::GENCODE::maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     fill_counters(M, individual.genotype);
     int max_bin_num = 0;
@@ -197,14 +182,14 @@ int BCGA::GENCODE::maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::Bin
     return max_bin_num + 1;
 }
 
-int BCGA::GENCODE::mixed_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+double BCGA::GENCODE::mixed_fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int maxbinsnum = maxbinsnum_fitness(M, individual);
     int covlen = covlen_fitness(M, individual);
     return maxbinsnum + covlen / (groups_idx.size() - 1);
 }
 
-int BCGA::GENCODE::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+double BCGA::GENCODE::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     switch(fit_function) {
         case Fitness::CovLen:

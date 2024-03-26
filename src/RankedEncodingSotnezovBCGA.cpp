@@ -73,7 +73,7 @@ void BCGA::GENCODE_plus::create_zero_generation(BooleanMatrix::BooleanMatrix& M,
         restore_solution(M, new_genes);
         population.push_back(BinaryIndividual(new_genes));
 
-        int cur_fitness = fitness(M, population[i]);
+        double cur_fitness = fitness(M, population[i]);
         double cur_rank = rank(population[i]);
 
         scores_sum += cur_fitness; // meh but ok
@@ -160,7 +160,7 @@ BCGA::BinaryIndividual BCGA::GENCODE_plus::crossover(BinaryIndividual& parent1, 
 
 void BCGA::GENCODE_plus::selection()
 {
-    int child_score = scores[population_size];
+    double child_score = scores[population_size];
     double child_rank = individual_ranks[population_size];
     bool child_in_population = false;
     bool hit_by_child = ((child_score < best_score) || ((child_score == best_score) && (child_rank < best_rank)));

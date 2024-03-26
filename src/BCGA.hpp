@@ -9,6 +9,7 @@
 #include <numeric>
 #include <algorithm>
 #include <ctime>
+#include <chrono>
 #include <stdexcept>
 #include <boost/dynamic_bitset.hpp>
 #include "BooleanMatrix.hpp"
@@ -16,6 +17,7 @@
 namespace BCGA {
     class BaseBCGA;
     class SotnezovBCGA;
+    class CODE3;
     class GENCODE;
     class GENCODE_plus;
     class BinaryIndividual;
@@ -48,7 +50,7 @@ public:
 class BCGA::BaseBCGA {
 protected:
     std::vector<BinaryIndividual> population;
-    std::vector<int> scores;
+    std::vector<double> scores;
     std::mt19937 rng;
 
     int max_iter;
@@ -71,13 +73,13 @@ protected:
     virtual void get_parent_indices(int& p1, int& p2) = 0;
     virtual BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2) = 0;
     virtual void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba) = 0;
-    virtual int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual) = 0;
+    virtual double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual) = 0;
     virtual void selection() = 0;
 
     virtual void update_scores(BooleanMatrix::BooleanMatrix& M);
     virtual void check_compatibility() {};
 public:
-    int best_score = -1;
+    double best_score = -1;
 
     BaseBCGA(int population_size, int extended_population_size, double mutation_proba, int max_iter = 100,
              int seed = -1, OutputMode verbose = OutputMode::Normal);
@@ -97,7 +99,7 @@ class BCGA::SotnezovBCGA: public BCGA::BaseBCGA {
 protected:
     std::vector<int> column_scores;
     std::vector<int> apriori_queue;
-    int scores_sum = 0;
+    double scores_sum = 0;
 
     int K = 100;
     double C = 0.01;
@@ -108,7 +110,7 @@ protected:
     void get_parent_indices(int& p1, int& p2);
     BinaryIndividual crossover(BinaryIndividual& parent1, BinaryIndividual& parent2);
     void mutate(BooleanMatrix::BooleanMatrix& M, double mutation_proba);
-    int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
     void selection();
 
     virtual void optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
@@ -136,15 +138,25 @@ protected:
     std::vector<double> build_decreasing_counters(boost::dynamic_bitset<>& columns, std::vector<int>& columns_argsort);
     void optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
     void restore_solution(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
-    int covlen_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
-    int maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
-    int mixed_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
-    int fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    double covlen_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    double maxbinsnum_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    double mixed_fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+    double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
 public:
     GENCODE(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, double C = 0.01,
                          int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 
     void analyze_solution(BooleanMatrix::BooleanMatrix& M);
+};
+
+class BCGA::CODE3: public BCGA::GENCODE {
+protected:
+    void optimize_covering(BooleanMatrix::BooleanMatrix& M, boost::dynamic_bitset<>& columns);
+    double fitness(BooleanMatrix::BooleanMatrix& M, BinaryIndividual& individual);
+
+public:
+    CODE3(int population_size, std::vector<int> groups_idx, Fitness optimize = Fitness::CovLen, int K = 100, double C = 0.01,
+                         int max_iter = 100, int seed = -1,  OutputMode verbose = OutputMode::Normal);
 };
 
 class BCGA::GENCODE_plus: public BCGA::GENCODE {

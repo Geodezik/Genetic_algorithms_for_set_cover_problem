@@ -7,8 +7,8 @@ BooleanMatrix::BooleanMatrix::BooleanMatrix(int m, int n) {
     columns = std::vector<boost::dynamic_bitset<>>();
     for (int i = 0; i < m; i++)
         rows.push_back(boost::dynamic_bitset<>(n, 0));
-    //for (int j = 0; j < n; j++)
-        //columns.push_back(boost::dynamic_bitset<>(m, 0));
+    for (int j = 0; j < n; j++)
+        columns.push_back(boost::dynamic_bitset<>(m, 0));
 }
 
 int BooleanMatrix::BooleanMatrix::get_m() {
@@ -44,5 +44,5 @@ bool BooleanMatrix::BooleanMatrix::get(int i, int j) {
 
 void BooleanMatrix::BooleanMatrix::set(int i, int j, bool val) {
     rows[i][j] = val;
-    //columns[j][i] = val;
+    columns[j][i] = val;
 }

@@ -124,20 +124,6 @@ void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M,
     scores_sum = 0;
     best_score = n;
 
-    double p = GlobalSettings::SotnezovInitProbability;
-    std::bernoulli_distribution bd(p);
-    for(int i = 0; i < population_size; i++) {
-        boost::dynamic_bitset<> new_genes;
-        for(int j = 0; j < genotype_len; j++)
-            new_genes.push_back(bd(rng));
-
-        restore_solution(M, new_genes);
-        population.push_back(BinaryIndividual(new_genes));
-        //optimize_covering(M, population[i].genotype);
-
-        scores_sum += fitness(M, population[i]); // meh
-    }
-
     //count apriori_column_scores
     column_scores = std::vector<int>();
     for(int j = 0; j < n; j++) {
@@ -147,6 +133,21 @@ void BCGA::SotnezovBCGA::create_zero_generation(BooleanMatrix::BooleanMatrix& M,
         column_scores.push_back(s);
     }
     apriori_queue = argsort(column_scores);
+
+    // filling basic fitnesses
+    double p = GlobalSettings::SotnezovInitProbability;
+    std::bernoulli_distribution bd(p);
+    for(int i = 0; i < population_size; i++) {
+        boost::dynamic_bitset<> new_genes;
+        for(int j = 0; j < genotype_len; j++)
+            new_genes.push_back(bd(rng));
+
+        restore_solution(M, new_genes);
+        population.push_back(BinaryIndividual(new_genes));
+        optimize_covering(M, population[i].genotype);
+
+        scores_sum += fitness(M, population[i]); // meh
+    }
 }
 
 void BCGA::SotnezovBCGA::get_parent_indices(int& p1, int& p2)
@@ -208,7 +209,7 @@ void BCGA::SotnezovBCGA::mutate(BooleanMatrix::BooleanMatrix& M, double mutation
     optimize_covering(M, population[child_idx].genotype);
 }
 
-int BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
+double BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryIndividual& individual)
 {
     int ones_counter = 0;
     for(int i = 0; i < individual.size(); i++)
@@ -219,7 +220,7 @@ int BCGA::SotnezovBCGA::fitness(BooleanMatrix::BooleanMatrix& M, BCGA::BinaryInd
 
 void BCGA::SotnezovBCGA::selection()
 {
-    int child_score = scores[population_size];
+    double child_score = scores[population_size];
     bool child_in_population = false;
     bool hit_by_child = (child_score < best_score);
     if(hit_by_child) 

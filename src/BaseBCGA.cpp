@@ -7,7 +7,7 @@ BCGA::BaseBCGA::BaseBCGA(int population_size, int extended_population_size, doub
     this->max_iter = max_iter;
     this->mutation_proba =  mutation_proba;
     this->verbose = verbose;
-    this->scores = std::vector<int>(extended_population_size);
+    this->scores = std::vector<double>(extended_population_size);
 
     if(seed >= 0)
         this->rng = std::mt19937(seed);
@@ -46,13 +46,13 @@ void BCGA::BaseBCGA::fit(BooleanMatrix::BooleanMatrix& M) {
     this->n = M.get_n();
 
     check_compatibility();
-
     population.clear();
+
     create_zero_generation(M, n);
 
     scores.clear();
     for(int j = 0; j < population_size; j++) {
-        int f = fitness(M, population[j]);
+        double f = fitness(M, population[j]);
         if(f < best_score) {
             best_score = f;
             best_index = j;
